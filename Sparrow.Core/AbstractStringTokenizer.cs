@@ -8,21 +8,7 @@ namespace Sparrow.Core
 {
     public sealed class AbstractStringTokenizer : IEnumerable<String>
     {
-        private const int LARGE_ALPHA_START = (int)'A';
-
-        private const int LARGE_ALPHA_END = (int)'Z';
-
-        private const int SMALL_ALPHA_START = (int)'a';
-
-        private const int SMALL_ALPHA_END = (int)'z';
-
-        private const int NUMBER_START = (int)'0';
-
-        private const int NUMBER_END = (int)'9';
-
-        private const char TOKEN_MARKER = '%';
-
-        private delegate bool TypeCheck(char value);
+        internal const char TOKEN_MARKER = '%';
 
         private readonly List<String> tokens = new List<String>();
 
@@ -55,13 +41,13 @@ namespace Sparrow.Core
 
             while (index < this.OriginalString.Length)
             {
-                if (IsAlpha(this.OriginalString[index]))
+                if (CharacterTypeHelper.IsAlpha(this.OriginalString[index]))
                 {
-                    tokenEndIndex = GetEndIndexForType(index, IsAlpha);
+                    tokenEndIndex = GetEndIndexForType(index, CharacterTypeHelper.IsAlpha);
                 }
-                else if (IsNumber(this.OriginalString[index]))
+                else if (CharacterTypeHelper.IsNumber(this.OriginalString[index]))
                 {
-                    tokenEndIndex = GetEndIndexForType(index, IsNumber);
+                    tokenEndIndex = GetEndIndexForType(index, CharacterTypeHelper.IsNumber);
                 }
                 else if (this.OriginalString[index] == TOKEN_MARKER)
                 {
@@ -89,23 +75,10 @@ namespace Sparrow.Core
             this.AbstractString = builder.ToString();
         }
 
-        private int GetEndIndexForType(int offset, TypeCheck typeCheck)
+        private int GetEndIndexForType(int offset, CharacterTypeHelper.TypeCheck typeCheck)
         {
             while (++offset < this.OriginalString.Length && typeCheck(this.OriginalString[offset])) ;
             return offset;
-        }
-
-        private static bool IsNumber(char value)
-        {
-            int raw = (int)value;
-            return raw >= NUMBER_START && raw <= NUMBER_END;
-        }
-
-        private static bool IsAlpha(char value)
-        {
-            int raw = (int)value;
-            return (raw >= LARGE_ALPHA_START && raw <= LARGE_ALPHA_END) ||
-                   (raw >= SMALL_ALPHA_START && raw <= SMALL_ALPHA_END);
         }
 
         public IEnumerator<String> GetEnumerator()

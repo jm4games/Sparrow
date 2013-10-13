@@ -50,8 +50,15 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Tests\AbstractStringMaskTests.cs" />
     <Compile Include="Tests\AbstractStringTokenizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sparrow.Core\Sparrow.Core.csproj">
+      <Project>{26affdeb-0008-4354-99a8-8fa2b29bcff1}</Project>
+      <Name>Sparrow.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
