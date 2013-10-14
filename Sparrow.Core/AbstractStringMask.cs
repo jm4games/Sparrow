@@ -18,7 +18,7 @@ namespace Sparrow.Core
 
         private bool isDirty = false;
         
-        public AbstractStringMask(AbstractStringTokenizer tokenizer, IDictionary<T, string> tokenMasks, T defaultMask)
+        public AbstractStringMask(AbstractStringTokenizer tokenizer, IDictionary<T, MaskInfo> tokenMasks, T defaultMask)
         {
             if (tokenizer == null)
             {
@@ -46,7 +46,7 @@ namespace Sparrow.Core
             }
         }
 
-        public IDictionary<T, string> TokenMasks { get; private set; }
+        public IDictionary<T, MaskInfo> TokenMasks { get; private set; }
 
         public AbstractStringTokenizer Tokenizer { get { return this.tokenizer; } }
         
@@ -73,20 +73,28 @@ namespace Sparrow.Core
             {
                 if (this.tokenizer.AbstractString[index] == AbstractStringTokenizer.TOKEN_MARKER)
                 {
-                    if (this.tokenizer.AbstractString[index + 1] == AbstractStringTokenizer.TOKEN_MARKER) // un-escape escaped token marker ie %% -> %
+                    if (this.tokenizer.AbstractString[index + 1] == AbstractStringTokenizer.TOKEN_MARKER) // escaped token marker ie %% -> %
                     {
-                        builder.Append(AbstractStringTokenizer.TOKEN_MARKER);
                         index += 2;
                     }
                     else
                     {
-                        builder.Append(this.TokenMasks[this.maskMappings[tokenIndex++]]);
+                        MaskInfo maskInfo = this.TokenMasks[this.maskMappings[tokenIndex]];
+
+                        if (!maskInfo.IsMergable ||
+                            tokenIndex == 0 || 
+                            !EqualityComparer<T>.Default.Equals(this.maskMappings[tokenIndex - 1], this.maskMappings[tokenIndex]))
+                        {
+                            builder.Append(maskInfo.MaskString);
+                        }
+
+                        tokenIndex++;
                         index = GetEndIndexForType(index, CharacterTypeHelper.IsNumber);
                     }
                 }
                 else
                 {
-                    builder.Append(this.tokenizer.AbstractString[index++]);
+                    index++;
                 }
             }
 
@@ -106,9 +114,7 @@ namespace Sparrow.Core
             {
                 throw new ArgumentNullException("tokenIndexes");
             }
-
-            //TODO: change to merge instead of multi, check sequence
-
+            
             for (int i = 0; i < tokenIndexes.Count; i++)
             {
                 SetTokenMask(tokenIndexes[i], mask);
