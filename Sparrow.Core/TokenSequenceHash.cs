@@ -15,7 +15,7 @@ namespace Sparrow.Core
         private const int START_INDEX4 = 24;
         private const int TOKEN_COUNT_INDEX = 31;
 
-        private static char[] HEX_VALUES = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+        private static readonly char[] HEX_VALUES = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
         private readonly byte[] rawSequence = new byte[SEQUENCE_LENGTH];
 
@@ -38,6 +38,8 @@ namespace Sparrow.Core
             this.rawSequence = rawSequence;
         }
 
+        public int TokenCount { get { return this.rawSequence[TOKEN_COUNT_INDEX]; } }
+
         public byte[] ToBytes()
         {
             byte[] result = new byte[SEQUENCE_LENGTH];
@@ -54,7 +56,7 @@ namespace Sparrow.Core
                 throw new InvalidOperationException("Max number of tokens reached.");
             }
 
-            int index = this.rawSequence[TOKEN_COUNT_INDEX] / 8;
+            int index = this.rawSequence[TOKEN_COUNT_INDEX] / sizeof(byte);
 
             this.rawSequence[index] <<=  1;
             this.rawSequence[index] |= 0x01;
@@ -68,7 +70,7 @@ namespace Sparrow.Core
                 throw new InvalidOperationException("Max number of tokens reached.");
             }
 
-            this.rawSequence[this.rawSequence[TOKEN_COUNT_INDEX] / 8] <<= 1;
+            this.rawSequence[this.rawSequence[TOKEN_COUNT_INDEX] / sizeof(byte)] <<= 1;
             this.rawSequence[TOKEN_COUNT_INDEX]++;
         }
         
@@ -84,7 +86,7 @@ namespace Sparrow.Core
                 return false;
             }
 
-            int lastIndex = this.rawSequence[TOKEN_COUNT_INDEX] / 8;
+            int lastIndex = this.rawSequence[TOKEN_COUNT_INDEX] / sizeof(byte);
             for (int i = 0; i <= lastIndex; i++)
             {
                 if (other.rawSequence[i] != this.rawSequence[i])
