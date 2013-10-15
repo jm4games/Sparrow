@@ -18,7 +18,7 @@ namespace Sparrow.Core
 
         private bool isDirty = false;
         
-        public AbstractStringMask(AbstractStringTokenizer tokenizer, IDictionary<T, MaskInfo> tokenMasks, T defaultMask)
+        public AbstractStringMask(AbstractStringTokenizer tokenizer, IDictionary<T, MaskConfiguration> tokenMasks, T defaultMask)
         {
             if (tokenizer == null)
             {
@@ -46,23 +46,10 @@ namespace Sparrow.Core
             }
         }
 
-        public IDictionary<T, MaskInfo> TokenMasks { get; private set; }
+        public IDictionary<T, MaskConfiguration> TokenMasks { get; private set; }
 
         public AbstractStringTokenizer Tokenizer { get { return this.tokenizer; } }
         
-        public string MaskedString
-        {
-            get
-            {
-                if (this.maskedString == null | this.isDirty)
-                {
-                    GenerateMaskedString();
-                }
-
-                return this.maskedString;
-            }
-        }
-
         private void GenerateMaskedString()
         {
             StringBuilder builder = new StringBuilder();
@@ -79,7 +66,7 @@ namespace Sparrow.Core
                     }
                     else
                     {
-                        MaskInfo maskInfo = this.TokenMasks[this.maskMappings[tokenIndex]];
+                        MaskConfiguration maskInfo = this.TokenMasks[this.maskMappings[tokenIndex]];
 
                         if (!maskInfo.IsMergable ||
                             tokenIndex == 0 || 
@@ -181,6 +168,16 @@ namespace Sparrow.Core
 
             this.maskMappings.CopyTo(mappings, 0);
             return mappings;
+        }
+
+        public override string ToString()
+        {
+            if (this.maskedString == null | this.isDirty)
+            {
+                GenerateMaskedString();
+            }
+
+            return this.maskedString;
         }
     }
 }

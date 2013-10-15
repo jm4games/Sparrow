@@ -16,11 +16,11 @@ namespace Sparrow.Core
             M3
         }
 
-        private static Dictionary<TestMask, MaskInfo> masks = new Dictionary<TestMask, MaskInfo>()
+        private static Dictionary<TestMask, MaskConfiguration> masks = new Dictionary<TestMask, MaskConfiguration>()
         {
-            {TestMask.Default, new MaskInfo(false, "%d")},
-            {TestMask.M1, new MaskInfo("%a")},
-            {TestMask.M2, new MaskInfo("%b")}
+            {TestMask.Default, new MaskConfiguration(false, "%d")},
+            {TestMask.M1, new MaskConfiguration("%a")},
+            {TestMask.M2, new MaskConfiguration("%b")}
             /* M3 should not be specified */
         };
 
@@ -42,7 +42,7 @@ namespace Sparrow.Core
         [ExpectedException(typeof(ArgumentException))]
         public void CtorThrowsWhenDefaultMaskStringNotDefined()
         {
-            new AbstractStringMask<TestMask>(new AbstractStringTokenizer("Test"), new Dictionary<TestMask, MaskInfo>(), TestMask.M1);
+            new AbstractStringMask<TestMask>(new AbstractStringTokenizer("Test"), new Dictionary<TestMask, MaskConfiguration>(), TestMask.M1);
         }
 
         [TestMethod]
@@ -102,7 +102,7 @@ namespace Sparrow.Core
         {
             AbstractStringMask<TestMask> mask = CreateMask("Test - 21!");
 
-            Assert.AreEqual(String.Format("{0}{0}", masks[TestMask.Default].MaskString), mask.MaskedString);
+            Assert.AreEqual(String.Format("{0}{0}", masks[TestMask.Default].MaskString), mask.ToString());
         }
 
         [TestMethod]
@@ -113,7 +113,7 @@ namespace Sparrow.Core
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M2);
 
-            Assert.AreEqual(masks[TestMask.M1].MaskString + masks[TestMask.M2].MaskString, mask.MaskedString);
+            Assert.AreEqual(masks[TestMask.M1].MaskString + masks[TestMask.M2].MaskString, mask.ToString());
         }
 
         [TestMethod]
@@ -124,7 +124,7 @@ namespace Sparrow.Core
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M2);
 
-            Assert.AreEqual(masks[TestMask.M1].MaskString + masks[TestMask.M2].MaskString, mask.MaskedString);
+            Assert.AreEqual(masks[TestMask.M1].MaskString + masks[TestMask.M2].MaskString, mask.ToString());
         }
 
         [TestMethod]
@@ -194,7 +194,7 @@ namespace Sparrow.Core
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M1);
 
-            Assert.AreEqual(masks[TestMask.M1].MaskString, mask.MaskedString);
+            Assert.AreEqual(masks[TestMask.M1].MaskString, mask.ToString());
         }
 
         [TestMethod]
@@ -206,7 +206,7 @@ namespace Sparrow.Core
             mask.SetTokenMask(1, TestMask.M2);
             mask.SetTokenMask(2, TestMask.M1);
 
-            Assert.AreEqual(String.Format("{0}{1}{0}", masks[TestMask.M1].MaskString, masks[TestMask.M2].MaskString), mask.MaskedString);
+            Assert.AreEqual(String.Format("{0}{1}{0}", masks[TestMask.M1].MaskString, masks[TestMask.M2].MaskString), mask.ToString());
         }
 
         private AbstractStringMask<TestMask> CreateMask(string valueToTokenize)

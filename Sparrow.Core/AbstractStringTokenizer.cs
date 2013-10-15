@@ -8,6 +8,8 @@ namespace Sparrow.Core
 {
     public sealed class AbstractStringTokenizer : IEnumerable<String>
     {
+        private const int MAX_FILENAME_SIZE = 255;
+
         internal const char TOKEN_MARKER = '%';
 
         private readonly List<String> tokens = new List<String>();
@@ -19,7 +21,13 @@ namespace Sparrow.Core
                 throw new ArgumentNullException("value");
             }
 
+            if (value.Length > MAX_FILENAME_SIZE)
+            {
+                throw new ArgumentException("value is longer than " + MAX_FILENAME_SIZE + " characters.");
+            }
+
             this.OriginalString = value;
+            this.TokenSequenceHash = new TokenSequenceHash();
             this.GenerateAbstractString();
         }
 
@@ -27,8 +35,10 @@ namespace Sparrow.Core
 
         public string AbstractString { get; private set; }
 
-        public int TokenCount { get { return this.tokens.Count; } }
+        public TokenSequenceHash TokenSequenceHash { get; private set; }
 
+        public int TokenCount { get { return this.tokens.Count; } }
+        
         public string this[int tokenIndex] { get { return this.tokens[tokenIndex]; } }
 
         private void GenerateAbstractString()
@@ -44,10 +54,12 @@ namespace Sparrow.Core
                 if (CharacterTypeHelper.IsAlpha(this.OriginalString[index]))
                 {
                     tokenEndIndex = GetEndIndexForType(index, CharacterTypeHelper.IsAlpha);
+                    this.TokenSequenceHash.MarkNextTokenAsAlpha();
                 }
                 else if (CharacterTypeHelper.IsNumber(this.OriginalString[index]))
                 {
                     tokenEndIndex = GetEndIndexForType(index, CharacterTypeHelper.IsNumber);
+                    this.TokenSequenceHash.MarkNextTokenAsNumber();
                 }
                 else if (this.OriginalString[index] == TOKEN_MARKER)
                 {
