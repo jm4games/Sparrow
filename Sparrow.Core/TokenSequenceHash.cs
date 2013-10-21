@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 namespace Sparrow.Core
 {
     public sealed class TokenSequenceHash : IEquatable<TokenSequenceHash>
-    {
-        private const int SEQUENCE_LENGTH = 33;
-        private const int START_INDEX1 = 0;
-        private const int START_INDEX2 = 8;
-        private const int START_INDEX3 = 16;
-        private const int START_INDEX4 = 24;
-        private const int TOKEN_COUNT_INDEX = 31;
+    { 
+        private const int BITS_IN_BYTES = 8;
+
+        private const int TOKEN_COUNT_INDEX = SEQUENCE_LENGTH - 1;
+
+        public const int SEQUENCE_LENGTH = 33;
 
         private static readonly char[] HEX_VALUES = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
-        private readonly byte[] rawSequence = new byte[SEQUENCE_LENGTH];
+        private readonly byte[] rawSequence;
 
         public TokenSequenceHash()
         {
+            rawSequence = new byte[SEQUENCE_LENGTH];
         }
      
         public TokenSequenceHash(byte[] rawSequence)
@@ -40,7 +40,7 @@ namespace Sparrow.Core
 
         public int TokenCount { get { return this.rawSequence[TOKEN_COUNT_INDEX]; } }
 
-        public byte[] ToBytes()
+        public byte[] GetBytes()
         {
             byte[] result = new byte[SEQUENCE_LENGTH];
 
@@ -56,7 +56,7 @@ namespace Sparrow.Core
                 throw new InvalidOperationException("Max number of tokens reached.");
             }
 
-            int index = this.rawSequence[TOKEN_COUNT_INDEX] / sizeof(byte);
+            int index = this.rawSequence[TOKEN_COUNT_INDEX] / BITS_IN_BYTES;
 
             this.rawSequence[index] <<=  1;
             this.rawSequence[index] |= 0x01;
@@ -70,7 +70,7 @@ namespace Sparrow.Core
                 throw new InvalidOperationException("Max number of tokens reached.");
             }
 
-            this.rawSequence[this.rawSequence[TOKEN_COUNT_INDEX] / sizeof(byte)] <<= 1;
+            this.rawSequence[this.rawSequence[TOKEN_COUNT_INDEX] / BITS_IN_BYTES] <<= 1;
             this.rawSequence[TOKEN_COUNT_INDEX]++;
         }
         
@@ -80,13 +80,13 @@ namespace Sparrow.Core
         }
 
         public bool Equals(TokenSequenceHash other)
-        {           
-            if (other == null || other.rawSequence[TOKEN_COUNT_INDEX] != this.rawSequence[TOKEN_COUNT_INDEX])
+        {
+            if (Object.ReferenceEquals(other, null) || other.rawSequence[TOKEN_COUNT_INDEX] != this.rawSequence[TOKEN_COUNT_INDEX])
             {
                 return false;
             }
 
-            int lastIndex = this.rawSequence[TOKEN_COUNT_INDEX] / sizeof(byte);
+            int lastIndex = this.rawSequence[TOKEN_COUNT_INDEX] / BITS_IN_BYTES;
             for (int i = 0; i <= lastIndex; i++)
             {
                 if (other.rawSequence[i] != this.rawSequence[i])
@@ -100,7 +100,15 @@ namespace Sparrow.Core
 
         public static bool operator ==(TokenSequenceHash seq1, TokenSequenceHash seq2)
         {
-            return seq1.Equals(seq2);
+            bool ref1 = Object.ReferenceEquals(seq1, null);
+            bool ref2 = Object.ReferenceEquals(seq2, null);
+
+            if (ref1 ^ ref2)
+            {
+                return false;
+            }
+
+            return (ref1 && ref2) || seq1.Equals(seq2);
         }
 
         public static bool operator !=(TokenSequenceHash seq1, TokenSequenceHash seq2)

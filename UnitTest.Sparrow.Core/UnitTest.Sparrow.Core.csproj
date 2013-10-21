@@ -50,7 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Tests\AbstractStringMaskTests.cs" />
+    <Compile Include="Tests\MaskedStringTests.cs" />
     <Compile Include="Tests\AbstractStringTokenizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\TokenSequenceHashTest.cs" />
