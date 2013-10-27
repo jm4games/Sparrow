@@ -6,61 +6,61 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Sparrow.Core
 {
     [TestClass]
-    public class AbstractStringTokenizerTests
+    public class FileNameTokenizerTests
     {
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void CtorThrowsWhenValueNull()
         {
-            new AbstractStringTokenizer(null);
+            new FileNameTokenizer(null);
         }
 
         [TestMethod]
-        public void EmptyAbstractStringWhenOriginalStringEmpty()
+        public void TokenCountZeroWhenFileNameEmpty()
         {
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer("");
+            FileNameTokenizer tokenizer = new FileNameTokenizer("");
 
-            Assert.AreEqual(tokenizer.OriginalString, tokenizer.AbstractString);
+            Assert.AreEqual(tokenizer.OriginalFileName, tokenizer.AbstractFileName);
             Assert.AreEqual(0, tokenizer.TokenCount, "No tokens created.");
         }
 
         [TestMethod]
         public void NoTokensCreatedWhenNumbersOrAlphaCharsExist()
         {
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer("^#*@(#*");
+            FileNameTokenizer tokenizer = new FileNameTokenizer("^#*@(#*");
 
-            Assert.AreEqual(tokenizer.OriginalString, tokenizer.AbstractString);
+            Assert.AreEqual(tokenizer.OriginalFileName, tokenizer.AbstractFileName);
             Assert.AreEqual(0, tokenizer.TokenCount, "No tokens created.");
         }
 
         [TestMethod]
         public void TokenMarkerEscapedWhenUsedInOriginalString()
         {
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer("%");
+            FileNameTokenizer tokenizer = new FileNameTokenizer("%");
 
-            Assert.AreEqual("%%", tokenizer.AbstractString);
+            Assert.AreEqual("%%", tokenizer.AbstractFileName);
         }
 
         [TestMethod]
-        public void TokenUsedWhenStringIsWord()
+        public void TokenUsedWhenFileNameIsWord()
         {
             const string token = "Test";
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer(token);
+            FileNameTokenizer tokenizer = new FileNameTokenizer(token);
 
             Assert.AreEqual(1, tokenizer.TokenCount);
             Assert.AreEqual(token, tokenizer[0]);
-            Assert.AreEqual("%0", tokenizer.AbstractString);
+            Assert.AreEqual("%0", tokenizer.AbstractFileName);
         }
 
         [TestMethod]
-        public void TokenUsedWhenStringIsNumber()
+        public void TokenUsedWhenFileNameIsNumber()
         {
             const string token = "Test";
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer(token);
+            FileNameTokenizer tokenizer = new FileNameTokenizer(token);
 
             Assert.AreEqual(1, tokenizer.TokenCount);
             Assert.AreEqual(token, tokenizer[0]);
-            Assert.AreEqual("%0", tokenizer.AbstractString);
+            Assert.AreEqual("%0", tokenizer.AbstractFileName);
         }
 
         [TestMethod]
@@ -68,20 +68,20 @@ namespace Sparrow.Core
         {
             const string token = "Test";
             const string token2 = "21";
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer(token + token2);
+            FileNameTokenizer tokenizer = new FileNameTokenizer(token + token2);
 
             Assert.AreEqual(2, tokenizer.TokenCount);
             Assert.AreEqual(token, tokenizer[0]);
             Assert.AreEqual(token2, tokenizer[1]);
-            Assert.AreEqual("%0%1", tokenizer.AbstractString);
+            Assert.AreEqual("%0%1", tokenizer.AbstractFileName);
         }
 
         [TestMethod]
-        public void AbstractStringInCorrectFormatWhenManySymbolsWordsAndNumbersUsed()
+        public void FileNameInCorrectFormatWhenManySymbolsWordsAndNumbersUsed()
         {
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer("this is *** a t3st. 201 ok!");
+            FileNameTokenizer tokenizer = new FileNameTokenizer("this is *** a t3st. 201 ok!");
 
-            Assert.AreEqual("%0 %1 *** %2 %3%4%5. %6 %7!", tokenizer.AbstractString);
+            Assert.AreEqual("%0 %1 *** %2 %3%4%5. %6 %7!", tokenizer.AbstractFileName);
         }
 
         [TestMethod]
@@ -89,7 +89,7 @@ namespace Sparrow.Core
         {
             const string token = "Test";
             const string token2 = "21";
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer(token + token2);
+            FileNameTokenizer tokenizer = new FileNameTokenizer(token + token2);
 
             Assert.AreEqual(String.Format("Original: {0}{1}Abstract: {2}", token + token2, Environment.NewLine, "%0%1"), tokenizer.ToString());
         }
@@ -99,7 +99,7 @@ namespace Sparrow.Core
         {
             const string token = "Test";
             const string token2 = "21";
-            AbstractStringTokenizer tokenizer = new AbstractStringTokenizer(token + token2);
+            FileNameTokenizer tokenizer = new FileNameTokenizer(token + token2);
             string expected = token;
 
             foreach (string tokenValue in tokenizer)

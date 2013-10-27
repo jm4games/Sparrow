@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Sparrow.Core
 {
-    public sealed class AbstractStringMask<T>
+    public sealed class MaskedFileName<T>
     {
-        private readonly AbstractStringTokenizer tokenizer;
+        private readonly FileNameTokenizer tokenizer;
 
         private readonly T defaultMask;
 
@@ -18,7 +18,7 @@ namespace Sparrow.Core
 
         private bool isDirty = false;
         
-        public AbstractStringMask(AbstractStringTokenizer tokenizer, IDictionary<T, MaskConfiguration> tokenMasks, T defaultMask)
+        public MaskedFileName(FileNameTokenizer tokenizer, IDictionary<T, MaskConfiguration> tokenMasks, T defaultMask)
         {
             if (tokenizer == null)
             {
@@ -48,7 +48,7 @@ namespace Sparrow.Core
 
         public IDictionary<T, MaskConfiguration> TokenMasks { get; private set; }
 
-        public AbstractStringTokenizer Tokenizer { get { return this.tokenizer; } }
+        public FileNameTokenizer Tokenizer { get { return this.tokenizer; } }
         
         private void GenerateMaskedString()
         {
@@ -56,11 +56,11 @@ namespace Sparrow.Core
             int tokenIndex = 0;
             int index = 0;
 
-            while (index < this.tokenizer.AbstractString.Length)
+            while (index < this.tokenizer.AbstractFileName.Length)
             {
-                if (this.tokenizer.AbstractString[index] == AbstractStringTokenizer.TOKEN_MARKER)
+                if (this.tokenizer.AbstractFileName[index] == FileNameTokenizer.TOKEN_MARKER)
                 {
-                    if (this.tokenizer.AbstractString[index + 1] == AbstractStringTokenizer.TOKEN_MARKER) // escaped token marker ie %% -> %
+                    if (this.tokenizer.AbstractFileName[index + 1] == FileNameTokenizer.TOKEN_MARKER) // escaped token marker ie %% -> %
                     {
                         index += 2;
                     }
@@ -91,7 +91,7 @@ namespace Sparrow.Core
 
         private int GetEndIndexForType(int offset, CharacterTypeHelper.TypeCheck typeCheck)
         {
-            while (++offset < this.tokenizer.AbstractString.Length && typeCheck(this.tokenizer.AbstractString[offset])) ;
+            while (++offset < this.tokenizer.AbstractFileName.Length && typeCheck(this.tokenizer.AbstractFileName[offset])) ;
             return offset;
         }
 

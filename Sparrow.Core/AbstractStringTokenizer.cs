@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sparrow.Core
 {
-    public sealed class AbstractStringTokenizer : IEnumerable<String>
+    public sealed class FileNameTokenizer : IEnumerable<String>
     {
         private const int MAX_FILENAME_SIZE = 255;
 
@@ -14,26 +14,26 @@ namespace Sparrow.Core
 
         private readonly List<String> tokens = new List<String>();
 
-        public AbstractStringTokenizer(string value)
+        public FileNameTokenizer(string fileName)
         {
-            if (value == null)
+            if (fileName == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException("fileName");
             }
 
-            if (value.Length > MAX_FILENAME_SIZE)
+            if (fileName.Length > MAX_FILENAME_SIZE)
             {
-                throw new ArgumentException("value is longer than " + MAX_FILENAME_SIZE + " characters.");
+                throw new ArgumentException("File name is longer than " + MAX_FILENAME_SIZE + " characters.");
             }
 
-            this.OriginalString = value;
+            this.OriginalFileName = fileName;
             this.TokenSequenceHash = new TokenSequenceHash();
-            this.GenerateAbstractString();
+            this.GenerateAbstractFileName();
         }
 
-        public string OriginalString { get; private set; }
+        public string OriginalFileName { get; private set; }
 
-        public string AbstractString { get; private set; }
+        public string AbstractFileName { get; private set; }
 
         public TokenSequenceHash TokenSequenceHash { get; private set; }
 
@@ -41,7 +41,7 @@ namespace Sparrow.Core
         
         public string this[int tokenIndex] { get { return this.tokens[tokenIndex]; } }
 
-        private void GenerateAbstractString()
+        private void GenerateAbstractFileName()
         {
             const int NO_END_INDEX = -1;
             StringBuilder builder = new StringBuilder();
@@ -49,30 +49,30 @@ namespace Sparrow.Core
             int tokenCount = 0;
             int index = 0;
 
-            while (index < this.OriginalString.Length)
+            while (index < this.OriginalFileName.Length)
             {
-                if (CharacterTypeHelper.IsAlpha(this.OriginalString[index]))
+                if (CharacterTypeHelper.IsAlpha(this.OriginalFileName[index]))
                 {
                     tokenEndIndex = GetEndIndexForType(index, CharacterTypeHelper.IsAlpha);
                     this.TokenSequenceHash.MarkNextTokenAsAlpha();
                 }
-                else if (CharacterTypeHelper.IsNumber(this.OriginalString[index]))
+                else if (CharacterTypeHelper.IsNumber(this.OriginalFileName[index]))
                 {
                     tokenEndIndex = GetEndIndexForType(index, CharacterTypeHelper.IsNumber);
                     this.TokenSequenceHash.MarkNextTokenAsNumber();
                 }
-                else if (this.OriginalString[index] == TOKEN_MARKER)
+                else if (this.OriginalFileName[index] == TOKEN_MARKER)
                 {
                     builder.AppendFormat("{0}{0}", TOKEN_MARKER);
                 }
                 else
                 {
-                    builder.Append(this.OriginalString[index]);
+                    builder.Append(this.OriginalFileName[index]);
                 }
 
                 if (tokenEndIndex != NO_END_INDEX)
                 {
-                    tokens.Add(this.OriginalString.Substring(index, tokenEndIndex - index));
+                    tokens.Add(this.OriginalFileName.Substring(index, tokenEndIndex - index));
                     builder.AppendFormat("{0}{1}", TOKEN_MARKER, tokenCount++);
 
                     index = tokenEndIndex;
@@ -84,12 +84,12 @@ namespace Sparrow.Core
                 }
             }
 
-            this.AbstractString = builder.ToString();
+            this.AbstractFileName = builder.ToString();
         }
 
         private int GetEndIndexForType(int offset, CharacterTypeHelper.TypeCheck typeCheck)
         {
-            while (++offset < this.OriginalString.Length && typeCheck(this.OriginalString[offset])) ;
+            while (++offset < this.OriginalFileName.Length && typeCheck(this.OriginalFileName[offset])) ;
             return offset;
         }
 
@@ -105,7 +105,7 @@ namespace Sparrow.Core
 
         public override string ToString()
         {
-            return String.Format("Original: {0}{1}Abstract: {2}", this.OriginalString, Environment.NewLine, this.AbstractString);
+            return String.Format("Original: {0}{1}Abstract: {2}", this.OriginalFileName, Environment.NewLine, this.AbstractFileName);
         }
     }
 }

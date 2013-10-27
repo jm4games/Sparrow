@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Sparrow.Core
 {
     [TestClass]
-    public class AbstractStringMaskTests
+    public class MaskedFileNameTests
     {
         private enum TestMask
         {
@@ -28,27 +28,27 @@ namespace Sparrow.Core
         [ExpectedException(typeof(ArgumentNullException))]
         public void CtorThrowsWhenTokenizerNull()
         {            
-            new AbstractStringMask<TestMask>(null, null, TestMask.M1);
+            new MaskedFileName<TestMask>(null, null, TestMask.M1);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void CtorThrowsWhenMasksNull()
         {
-            new AbstractStringMask<TestMask>(new AbstractStringTokenizer("Test"), null, TestMask.M1);
+            new MaskedFileName<TestMask>(new FileNameTokenizer("Test"), null, TestMask.M1);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void CtorThrowsWhenDefaultMaskStringNotDefined()
         {
-            new AbstractStringMask<TestMask>(new AbstractStringTokenizer("Test"), new Dictionary<TestMask, MaskConfiguration>(), TestMask.M1);
+            new MaskedFileName<TestMask>(new FileNameTokenizer("Test"), new Dictionary<TestMask, MaskConfiguration>(), TestMask.M1);
         }
 
         [TestMethod]
         public void TaskMappingDefaultSetWhenMaskCreated()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test 21!");
             TestMask[] mappings = mask.GetMaskMappings();
 
             for (int i = 0; i < mappings.Length; i++)
@@ -63,7 +63,7 @@ namespace Sparrow.Core
         [TestMethod]
         public void MaskSetWhenSet()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test 21!");
 
             mask.SetTokenMask(0, TestMask.M1);
 
@@ -74,7 +74,7 @@ namespace Sparrow.Core
         [ExpectedException(typeof(IndexOutOfRangeException))]
         public void ExceptionThrownWhenSettingMaskOfNegativeIndex()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test 21!");
 
             mask.SetTokenMask(-1, TestMask.M1);
         }
@@ -83,7 +83,7 @@ namespace Sparrow.Core
         [ExpectedException(typeof(IndexOutOfRangeException))]
         public void ExceptionThrownWhenSettingMaskOfIndexGreaterThenNumberOfTokens()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test 21!");
 
             mask.SetTokenMask(mask.GetMaskMappings().Length + 1, TestMask.M1);
         }
@@ -92,7 +92,7 @@ namespace Sparrow.Core
         [ExpectedException(typeof(ArgumentException))]
         public void ExceptionThrownWhenSettingMaskWithNoStringDefined()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test 21!");
 
             mask.SetTokenMask(0, TestMask.M3);
         }
@@ -100,7 +100,7 @@ namespace Sparrow.Core
         [TestMethod]
         public void MaskedStringHasDefaultMasksWhenGeneratedWithNoMaskMappingSet()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test - 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test - 21!");
 
             Assert.AreEqual(String.Format("{0}{0}", masks[TestMask.Default].MaskString), mask.ToString());
         }
@@ -108,7 +108,7 @@ namespace Sparrow.Core
         [TestMethod]
         public void MaskedStringHasSetMaskedValuesWhenValueSet()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test - 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test - 21!");
 
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M2);
@@ -119,7 +119,7 @@ namespace Sparrow.Core
         [TestMethod]
         public void MaskedStringHasNoMaskMarkerWhenEscapedMarkerExist()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test % 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test % 21!");
 
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M2);
@@ -131,7 +131,7 @@ namespace Sparrow.Core
         public void FirstMaskValueReturnedWhenMultipleValuesHaveSameMask()
         {
             const string value = "Test";
-            AbstractStringMask<TestMask> mask = CreateMask(value + " - 21!");
+            MaskedFileName<TestMask> mask = CreateMask(value + " - 21!");
 
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M1);
@@ -142,7 +142,7 @@ namespace Sparrow.Core
         [TestMethod]
         public void EntireMaskValueReturnedWhenMultipleValuesHaveSameMask()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test - 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test - 21!");
 
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M1);
@@ -154,7 +154,7 @@ namespace Sparrow.Core
         [ExpectedException(typeof(ArgumentNullException))]
         public void ExceptionThrownWhenMaskValueDelimiterNull()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test - 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test - 21!");
 
             mask.GetMaskValue(TestMask.Default, null);
         }
@@ -163,7 +163,7 @@ namespace Sparrow.Core
         [ExpectedException(typeof(ArgumentNullException))]
         public void ExceptionThrownWhenTokenIndexListNullWhenSettingTokenMask()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test - 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test - 21!");
 
             mask.SetTokenMask(null, TestMask.M1);
         }
@@ -171,7 +171,7 @@ namespace Sparrow.Core
         [TestMethod]
         public void MultipleTokenIndexSetWhenSetMaskTokenUsesList()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test - 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test - 21!");
 
             mask.SetTokenMask(new List<int>() { 0, 1 }, TestMask.M1);
 
@@ -189,7 +189,7 @@ namespace Sparrow.Core
         [TestMethod]
         public void TokensMergedWhenMaskMergable()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test - 21!");
+            MaskedFileName<TestMask> mask = CreateMask("Test - 21!");
 
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M1);
@@ -200,7 +200,7 @@ namespace Sparrow.Core
         [TestMethod]
         public void TokensNotMergedWhenMaskSplitsTwoOtherMasks()
         {
-            AbstractStringMask<TestMask> mask = CreateMask("Test - 21 - Ok!");
+            MaskedFileName<TestMask> mask = CreateMask("Test - 21 - Ok!");
 
             mask.SetTokenMask(0, TestMask.M1);
             mask.SetTokenMask(1, TestMask.M2);
@@ -209,9 +209,9 @@ namespace Sparrow.Core
             Assert.AreEqual(String.Format("{0}{1}{0}", masks[TestMask.M1].MaskString, masks[TestMask.M2].MaskString), mask.ToString());
         }
 
-        private AbstractStringMask<TestMask> CreateMask(string valueToTokenize)
+        private MaskedFileName<TestMask> CreateMask(string valueToTokenize)
         {
-            return new AbstractStringMask<TestMask>(new AbstractStringTokenizer(valueToTokenize), masks, TestMask.Default);
+            return new MaskedFileName<TestMask>(new FileNameTokenizer(valueToTokenize), masks, TestMask.Default);
         }
     }
 }
