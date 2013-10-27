@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace Sparrow.Core
 {
-    public sealed class MaskedStringEntity
+    public sealed class MaskedFileNameEntity
     {
         public uint Id { get; private set; }
 
-        public string MaskedString { get; private set; }
+        public string MaskedFileName { get; private set; }
 
         public TokenSequenceHash TokenSequenceHash { get; private set; }
 
-        public IList<string> AbstractStrings { get; private set; }
+        public IList<string> AbstractFileNames { get; private set; }
     }
 }

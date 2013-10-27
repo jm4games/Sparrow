@@ -28,12 +28,12 @@ namespace Sparrow.Core
 
             this.OriginalFileName = fileName;
             this.TokenSequenceHash = new TokenSequenceHash();
-            this.GenerateAbstractFileName();
+            this.GenerateTokenizedFileName();
         }
 
         public string OriginalFileName { get; private set; }
 
-        public string AbstractFileName { get; private set; }
+        public string TokenizedFileName { get; private set; }
 
         public TokenSequenceHash TokenSequenceHash { get; private set; }
 
@@ -41,7 +41,7 @@ namespace Sparrow.Core
         
         public string this[int tokenIndex] { get { return this.tokens[tokenIndex]; } }
 
-        private void GenerateAbstractFileName()
+        private void GenerateTokenizedFileName()
         {
             const int NO_END_INDEX = -1;
             StringBuilder builder = new StringBuilder();
@@ -84,7 +84,7 @@ namespace Sparrow.Core
                 }
             }
 
-            this.AbstractFileName = builder.ToString();
+            this.TokenizedFileName = builder.ToString();
         }
 
         private int GetEndIndexForType(int offset, CharacterTypeHelper.TypeCheck typeCheck)
@@ -105,7 +105,7 @@ namespace Sparrow.Core
 
         public override string ToString()
         {
-            return String.Format("Original: {0}{1}Abstract: {2}", this.OriginalFileName, Environment.NewLine, this.AbstractFileName);
+            return String.Format("Original: {0}{1}Tokenized: {2}", this.OriginalFileName, Environment.NewLine, this.TokenizedFileName);
         }
     }
 }

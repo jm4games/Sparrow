@@ -20,7 +20,7 @@ namespace Sparrow.Core
         {
             FileNameTokenizer tokenizer = new FileNameTokenizer("");
 
-            Assert.AreEqual(tokenizer.OriginalFileName, tokenizer.AbstractFileName);
+            Assert.AreEqual(tokenizer.OriginalFileName, tokenizer.TokenizedFileName);
             Assert.AreEqual(0, tokenizer.TokenCount, "No tokens created.");
         }
 
@@ -29,7 +29,7 @@ namespace Sparrow.Core
         {
             FileNameTokenizer tokenizer = new FileNameTokenizer("^#*@(#*");
 
-            Assert.AreEqual(tokenizer.OriginalFileName, tokenizer.AbstractFileName);
+            Assert.AreEqual(tokenizer.OriginalFileName, tokenizer.TokenizedFileName);
             Assert.AreEqual(0, tokenizer.TokenCount, "No tokens created.");
         }
 
@@ -38,7 +38,7 @@ namespace Sparrow.Core
         {
             FileNameTokenizer tokenizer = new FileNameTokenizer("%");
 
-            Assert.AreEqual("%%", tokenizer.AbstractFileName);
+            Assert.AreEqual("%%", tokenizer.TokenizedFileName);
         }
 
         [TestMethod]
@@ -49,7 +49,7 @@ namespace Sparrow.Core
 
             Assert.AreEqual(1, tokenizer.TokenCount);
             Assert.AreEqual(token, tokenizer[0]);
-            Assert.AreEqual("%0", tokenizer.AbstractFileName);
+            Assert.AreEqual("%0", tokenizer.TokenizedFileName);
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace Sparrow.Core
 
             Assert.AreEqual(1, tokenizer.TokenCount);
             Assert.AreEqual(token, tokenizer[0]);
-            Assert.AreEqual("%0", tokenizer.AbstractFileName);
+            Assert.AreEqual("%0", tokenizer.TokenizedFileName);
         }
 
         [TestMethod]
@@ -73,7 +73,7 @@ namespace Sparrow.Core
             Assert.AreEqual(2, tokenizer.TokenCount);
             Assert.AreEqual(token, tokenizer[0]);
             Assert.AreEqual(token2, tokenizer[1]);
-            Assert.AreEqual("%0%1", tokenizer.AbstractFileName);
+            Assert.AreEqual("%0%1", tokenizer.TokenizedFileName);
         }
 
         [TestMethod]
@@ -81,7 +81,7 @@ namespace Sparrow.Core
         {
             FileNameTokenizer tokenizer = new FileNameTokenizer("this is *** a t3st. 201 ok!");
 
-            Assert.AreEqual("%0 %1 *** %2 %3%4%5. %6 %7!", tokenizer.AbstractFileName);
+            Assert.AreEqual("%0 %1 *** %2 %3%4%5. %6 %7!", tokenizer.TokenizedFileName);
         }
 
         [TestMethod]

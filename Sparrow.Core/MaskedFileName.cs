@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sparrow.Core
 {
-    public sealed class MaskedFileName<T>
+    public sealed class MaskedFileName<T> : IMaskedFileName
     {
         private readonly FileNameTokenizer tokenizer;
 
@@ -56,11 +56,11 @@ namespace Sparrow.Core
             int tokenIndex = 0;
             int index = 0;
 
-            while (index < this.tokenizer.AbstractFileName.Length)
+            while (index < this.tokenizer.TokenizedFileName.Length)
             {
-                if (this.tokenizer.AbstractFileName[index] == FileNameTokenizer.TOKEN_MARKER)
+                if (this.tokenizer.TokenizedFileName[index] == FileNameTokenizer.TOKEN_MARKER)
                 {
-                    if (this.tokenizer.AbstractFileName[index + 1] == FileNameTokenizer.TOKEN_MARKER) // escaped token marker ie %% -> %
+                    if (this.tokenizer.TokenizedFileName[index + 1] == FileNameTokenizer.TOKEN_MARKER) // escaped token marker ie %% -> %
                     {
                         index += 2;
                     }
@@ -91,7 +91,7 @@ namespace Sparrow.Core
 
         private int GetEndIndexForType(int offset, CharacterTypeHelper.TypeCheck typeCheck)
         {
-            while (++offset < this.tokenizer.AbstractFileName.Length && typeCheck(this.tokenizer.AbstractFileName[offset])) ;
+            while (++offset < this.tokenizer.TokenizedFileName.Length && typeCheck(this.tokenizer.TokenizedFileName[offset])) ;
             return offset;
         }
 
