@@ -18,7 +18,7 @@ namespace Sparrow.Core
 
         private bool isDirty = false;
         
-        public MaskedFileName(FileNameTokenizer tokenizer, IDictionary<T, MaskConfiguration> tokenMasks, T defaultMask)
+        public MaskedFileName(FileNameTokenizer tokenizer, IDictionary<T, MaskConfiguration> tokenMasks)
         {
             if (tokenizer == null)
             {
@@ -30,14 +30,14 @@ namespace Sparrow.Core
                 throw new ArgumentNullException("tokenMasks");
             }
 
-            if (!tokenMasks.ContainsKey(defaultMask))
+            if (!tokenMasks.ContainsKey(default(T)))
             {
                 throw new ArgumentException("A mask string does not exist for provided default mask.");
             }
 
             this.tokenizer = tokenizer;
             this.TokenMasks = tokenMasks;
-            this.defaultMask = defaultMask;
+            this.defaultMask = default(T);
             this.maskMappings = new T[tokenizer.TokenCount];
 
             for (int i=0; i < this.maskMappings.Length; i++)
@@ -168,6 +168,11 @@ namespace Sparrow.Core
 
             this.maskMappings.CopyTo(mappings, 0);
             return mappings;
+        }
+
+        public bool IsMaskSetForToken(int tokenIndex)
+        {
+            return EqualityComparer<T>.Default.Equals(this.maskMappings[tokenIndex], this.defaultMask);
         }
 
         public override string ToString()

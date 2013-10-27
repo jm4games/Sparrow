@@ -39,13 +39,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MaskedString.cs" />
-    <Compile Include="AbstractStringTokenizer.cs" />
+    <Compile Include="FileNameTokenizer.cs" />
+    <Compile Include="IKnowledgeBase.cs" />
     <Compile Include="CharacterTypeHelper.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="MaskConfiguration.cs" />
+    <Compile Include="MaskedFileName.cs" />
     <Compile Include="MaskedStringEntity.cs" />
+    <Compile Include="MaskRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MaskRuleEngine.cs" />
+    <Compile Include="FileNameEvaluationContext.cs" />
     <Compile Include="TokenSequenceHash.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
