@@ -91,7 +91,7 @@ namespace Sparrow.Core
             const string token2 = "21";
             FileNameTokenizer tokenizer = new FileNameTokenizer(token + token2);
 
-            Assert.AreEqual(String.Format("Original: {0}{1}Abstract: {2}", token + token2, Environment.NewLine, "%0%1"), tokenizer.ToString());
+            Assert.AreEqual(String.Format("Original: {0}{1}Tokenized: {2}", token + token2, Environment.NewLine, "%0%1"), tokenizer.ToString());
         }
 
         [TestMethod]

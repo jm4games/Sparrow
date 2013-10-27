@@ -28,21 +28,21 @@ namespace Sparrow.Core
         [ExpectedException(typeof(ArgumentNullException))]
         public void CtorThrowsWhenTokenizerNull()
         {            
-            new MaskedFileName<TestMask>(null, null, TestMask.M1);
+            new MaskedFileName<TestMask>(null, null);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void CtorThrowsWhenMasksNull()
         {
-            new MaskedFileName<TestMask>(new FileNameTokenizer("Test"), null, TestMask.M1);
+            new MaskedFileName<TestMask>(new FileNameTokenizer("Test"), null);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void CtorThrowsWhenDefaultMaskStringNotDefined()
         {
-            new MaskedFileName<TestMask>(new FileNameTokenizer("Test"), new Dictionary<TestMask, MaskConfiguration>(), TestMask.M1);
+            new MaskedFileName<TestMask>(new FileNameTokenizer("Test"), new Dictionary<TestMask, MaskConfiguration>());
         }
 
         [TestMethod]
@@ -211,7 +211,7 @@ namespace Sparrow.Core
 
         private MaskedFileName<TestMask> CreateMask(string valueToTokenize)
         {
-            return new MaskedFileName<TestMask>(new FileNameTokenizer(valueToTokenize), masks, TestMask.Default);
+            return new MaskedFileName<TestMask>(new FileNameTokenizer(valueToTokenize), masks);
         }
     }
 }
