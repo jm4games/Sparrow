@@ -108,5 +108,7 @@ namespace Sparrow.Core
                 expected = token2;
             }
         }
+
+        // TODO: Test get token sequence
     }
 }

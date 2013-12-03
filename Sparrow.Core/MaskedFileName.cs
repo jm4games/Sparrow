@@ -95,6 +95,25 @@ namespace Sparrow.Core
             return offset;
         }
 
+        public void SetTokenMask(int startIndex, int length, T mask)
+        {
+            if (startIndex < 0 || startIndex >= this.maskMappings.Length)
+            {
+                throw new IndexOutOfRangeException(startIndex + " is not a valid token index.");
+            }
+
+            int lastIndex = startIndex + length;
+            if (lastIndex > this.maskMappings.Length)
+            {
+                throw new IndexOutOfRangeException("length '" + length + "' is to large.");
+            }
+
+            for (int i = startIndex; i < lastIndex; i++)
+            {
+                SetTokenMaskInternal(i, mask);
+            }
+        }
+
         public void SetTokenMask(IList<int> tokenIndexes, T mask)
         {
             if (tokenIndexes == null)
@@ -120,6 +139,11 @@ namespace Sparrow.Core
                 throw new ArgumentException("Could not find string value for mask '" + this.maskMappings[tokenIndex].ToString() + "'.");
             }
 
+            this.SetTokenMaskInternal(tokenIndex, mask);
+        }
+
+        private void SetTokenMaskInternal(int tokenIndex, T mask)
+        {
             maskMappings[tokenIndex] = mask;
             isDirty = true;
         }

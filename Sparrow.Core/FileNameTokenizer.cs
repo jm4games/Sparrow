@@ -93,6 +93,38 @@ namespace Sparrow.Core
             return offset;
         }
 
+        public string GetTokenSequence(int start, int end, string delimiter)
+        {
+            if (start < this.tokens.Count || start >= this.tokens.Count)
+            {
+                throw new IndexOutOfRangeException("start");
+            }
+
+            if (end < this.tokens.Count || end >= this.tokens.Count)
+            {
+                throw new IndexOutOfRangeException("end");
+            }
+
+            if (start >= end)
+            {
+                throw new ArgumentException("End is not greater than start.");
+            }
+            
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = start; i <= end; i++)
+            {
+                builder.AppendFormat("{0}{1}", this.tokens[i], delimiter);
+            }
+
+            if (builder.Length > 0)
+            {
+                builder.Remove(builder.Length - delimiter.Length, delimiter.Length); // remove trailing delimiter
+            }
+
+            return builder.ToString();
+        }
+
         public IEnumerator<String> GetEnumerator()
         {
             return tokens.GetEnumerator();

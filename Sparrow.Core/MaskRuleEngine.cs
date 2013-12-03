@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Sparrow.Core
 {
@@ -8,23 +9,30 @@ namespace Sparrow.Core
     {
         private readonly List<Type> rules;
 
-        public MaskRuleEngine(IEnumerable<Type> rules)
+        public MaskRuleEngine(IEnumerable<Type> ruleTypes)
         {
-            if (rules == null)
+            if (ruleTypes == null)
             {
-                throw new ArgumentNullException("rules");
+                throw new ArgumentNullException("ruleTypes");
             }
 
-            if (rules.Any(type => !type.IsSubclassOf(typeof(MaskRule<TMask, TKnow>))))
+            foreach (Type ruleType in ruleTypes)
             {
-                throw new ArgumentException("A type supplied for a rule was not a subclass of '" + typeof(MaskRule<TMask, TKnow>) + "'.");
+                if (!ruleType.IsSubclassOf(typeof(MaskRule<TMask, TKnow>)))
+                {
+                    throw new ArgumentException("A type supplied for a rule was not a subclass of '" + typeof(MaskRule<TMask, TKnow>).FullName + "'.");
+                }
+
+                if (ruleType.GetConstructor(Type.EmptyTypes) == null)
+                {
+                    throw new ArgumentException("Rule type '" + ruleType.FullName + "' does not have a default constructor.");
+                }
             }
 
-            //TODO: check for default ctor on all types
             this.rules = new List<Type>(rules);
         }
 
-        public void EvaluateFileNameAgainstRules(FileNameEvaluationContext<TMask, TKnow> context)
+        public Task<bool> EvaluateFileNameAgainstRulesAsync(FileNameEvaluationContext<TMask, TKnow> context)
         {
             if (context == null)
             {
@@ -33,7 +41,7 @@ namespace Sparrow.Core
 
             if (context.AllTokensHaveMask)
             {
-                return;
+                return Task.FromResult(true);
             }
 
             if (context.Rules.Count == 0)
@@ -41,7 +49,9 @@ namespace Sparrow.Core
                 this.AddRules(context.Rules);
             }
 
-            //TODO: evaluate
+            return EvaluateMaskedStringTokensIndividuallyAsync(context)
+                        .ContinueWith<Task<bool>>(CompleteTaskEvaluateTokensIndividually, context)
+                            .Unwrap();
         }
 
         private void AddRules(IList<MaskRule<TMask, TKnow>> destination)
@@ -52,35 +62,96 @@ namespace Sparrow.Core
             }
         }
 
-        private void EvaluateTokens(FileNameEvaluationContext<TMask, TKnow> context)
+        private async static Task<bool> EvaluateMaskedStringTokensIndividuallyAsync(FileNameEvaluationContext<TMask, TKnow> context)
         {
-            bool maskFound;
-
-            do
+            for (int i = 0; i < context.MaskedString.Tokenizer.TokenCount && !context.AllTokensHaveMask; i++)
             {
-                maskFound = false;
+                MatchResult result = await TryMatchRuleAsync(context, context.MaskedString.Tokenizer[i]).ConfigureAwait(false);
 
-                // evaluate each token by itself
-                for (int i = 0; i < context.MaskedString.Tokenizer.TokenCount; i++)
+                if (!context.MaskedString.IsMaskSetForToken(i) && result.WasMatch)
                 {
-                    if (!context.MaskedString.IsMaskSetForToken(i))
+                    context.MaskedString.SetTokenMask(i, result.Mask);
+                }
+            }
+
+            return context.AllTokensHaveMask;
+        }
+
+        private static Task<bool> CompleteTaskEvaluateTokensIndividually(Task<bool> completedTask, object state)
+        {
+            if (completedTask.IsFaulted)
+            {
+                return completedTask;
+            }
+
+            return EvaluateMaskedStringTokenSequencesAsync(state as FileNameEvaluationContext<TMask, TKnow>);
+        }
+
+        private async static Task<bool> EvaluateMaskedStringTokenSequencesAsync(FileNameEvaluationContext<TMask, TKnow> context)
+        {
+            const int IndexNotSetValue = -1;
+            int seqStart = IndexNotSetValue;
+            int seqEnd = IndexNotSetValue;
+            bool creatingSeq = false;
+
+            for (int i = 0; i < context.MaskedString.Tokenizer.TokenCount && !context.AllTokensHaveMask; i++)
+            {
+                if (!context.MaskedString.IsMaskSetForToken(i))
+                {
+                    if (seqStart == IndexNotSetValue) // first index of the sequence
                     {
-                        foreach (MaskRule<TMask, TKnow> rule in context.Rules)
-                        {
-                            if (rule.IsMatch(context, context.MaskedString.Tokenizer[i]))
-                            {
-                                context.MaskedString.SetTokenMask(i, rule.Mask);
-                                maskFound = true;
-                                break;
-                            }
-                        }
+                        seqStart = i;
+                        creatingSeq = true;
+                    }
+                    else
+                    {
+                        seqEnd = i; // current end of sequence, this will change until a token with a mask is set.
                     }
                 }
+                else if (creatingSeq)
+                {
+                    if (seqEnd == IndexNotSetValue) 
+                    {
+                        // no sequence found, meaning we found 1 token without a mask, but the token after had a mask
+                        // therefore we have a sequence of 1 word which isn't a sequence.
+                        seqStart = IndexNotSetValue;
+                    }
+                    else
+                    {
+                        MatchResult result = await TryMatchRuleAsync(context, context.MaskedString.Tokenizer.GetTokenSequence(seqStart, seqEnd, " ")).ConfigureAwait(false);
 
-                // next evaluate each token sequence greater than 1
-                //TODO: evaluate token sequences
+                        // combine the strings for the sequence and evaluate the result
+                        if (result.WasMatch)
+                        {
+                            context.MaskedString.SetTokenMask(seqStart, (seqEnd - seqStart) + 1 /* +1 accounts for seqEnd being inclusive */, result.Mask);
+                        }
+
+                        seqStart = seqEnd = IndexNotSetValue;
+                    }
+                }
             }
-            while (maskFound && !context.AllTokensHaveMask);
+
+            return context.AllTokensHaveMask;
+        }
+
+        private async static Task<MatchResult> TryMatchRuleAsync(FileNameEvaluationContext<TMask, TKnow> context, string value)
+        {
+            foreach (MaskRule<TMask, TKnow> rule in context.Rules)
+            {
+                if (await rule.IsMatchAsync(context, value).ConfigureAwait(false))
+                {
+                    return new MatchResult() { WasMatch = true, Mask = rule.Mask };
+                }
+            }
+
+            return new MatchResult();
+        }
+
+        private struct MatchResult
+        {
+            public bool WasMatch { get; set; }
+
+            public TMask Mask { get; set; }
         }
     }
 }

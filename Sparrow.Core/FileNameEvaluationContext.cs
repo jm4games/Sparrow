@@ -24,6 +24,8 @@ namespace Sparrow.Core
             this.KnowledgeBase = knowledgeBase;
             this.Rules = new List<MaskRule<TMask, TKnow>>();
             this.SetMaskCount = 0;
+
+            //TODO: add code for increasing mask count
         }
 
         public MaskedFileName<TMask> MaskedString { get; private set; }
@@ -34,6 +36,6 @@ namespace Sparrow.Core
 
         internal int SetMaskCount { get; set; }
 
-        internal List<MaskRule<TMask, TKnow>> Rules { get; private set; }
+        internal IList<MaskRule<TMask, TKnow>> Rules { get; private set; }
     }
 }

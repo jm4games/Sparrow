@@ -4,6 +4,6 @@
     {
         public abstract TMask Mask { get; }
 
-        public abstract bool IsMatch(FileNameEvaluationContext<TMask, TKnow> context, string value);
+        public abstract System.Threading.Tasks.Task<bool> IsMatchAsync(FileNameEvaluationContext<TMask, TKnow> context, string value);
     }
 }
