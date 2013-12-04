@@ -49,7 +49,9 @@
     <Compile Include="MaskedFileNameEntity.cs" />
     <Compile Include="MaskRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MaskRuleEngine.cs" />
+    <Compile Include="MaskRuleEngine.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="FileNameEvaluationContext.cs" />
     <Compile Include="TokenSequenceHash.cs" />
   </ItemGroup>
