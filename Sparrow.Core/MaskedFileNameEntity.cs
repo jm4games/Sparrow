@@ -12,7 +12,7 @@ namespace Sparrow.Core
 
         public string MaskedFileName { get; private set; }
 
-        public TokenSequenceHash TokenSequenceHash { get; private set; }
+        public BinarySequenceHashBuilder TokenSequenceHash { get; private set; }
 
         public IList<string> AbstractFileNames { get; private set; }
     }

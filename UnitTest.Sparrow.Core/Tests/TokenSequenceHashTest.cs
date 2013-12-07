@@ -4,35 +4,35 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Sparrow.Core.Tests
 {
     [TestClass]
-    public class TokenSequenceHashTest
+    public class BinarySequenceHashBuilderTest
     {
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void CtorThrowsWhenRawSequenceNull()
         {
-            new TokenSequenceHash(null);
+            new BinarySequenceHashBuilder(null);
         }
 
         [TestMethod]
         public void TokenCountIncreasedWhenTokenMarked()
         {
-            TokenSequenceHash hash = new TokenSequenceHash();
+            BinarySequenceHashBuilder hash = new BinarySequenceHashBuilder();
 
-            Assert.AreEqual(0, hash.TokenCount);
+            Assert.AreEqual(0, hash.SequenceLength);
 
-            hash.MarkNextTokenAsAlpha();
-            Assert.AreEqual(1, hash.TokenCount);
+            hash.AppendZeroToSequence();
+            Assert.AreEqual(1, hash.SequenceLength);
 
-            hash.MarkNextTokenAsNumber();
-            Assert.AreEqual(2, hash.TokenCount);
+            hash.AppendOneSequence();
+            Assert.AreEqual(2, hash.SequenceLength);
         }
 
         [TestMethod]
         public void BitIs0WhenTokenIsAlpha()
         {
-            TokenSequenceHash hash = new TokenSequenceHash();
+            BinarySequenceHashBuilder hash = new BinarySequenceHashBuilder();
 
-            hash.MarkNextTokenAsAlpha();
+            hash.AppendZeroToSequence();
 
             Assert.AreEqual(0, hash.GetBytes()[0]);
         }
@@ -40,9 +40,9 @@ namespace Sparrow.Core.Tests
         [TestMethod]
         public void BitIs1WhenTokenIsNumber()
         {
-            TokenSequenceHash hash = new TokenSequenceHash();
+            BinarySequenceHashBuilder hash = new BinarySequenceHashBuilder();
 
-            hash.MarkNextTokenAsNumber();
+            hash.AppendOneSequence();
 
             Assert.AreEqual(1, hash.GetBytes()[0]);
         }
@@ -50,12 +50,12 @@ namespace Sparrow.Core.Tests
         [TestMethod]
         public void BitsMarkedInSequenceWhenMultipleTokensSet()
         {
-            TokenSequenceHash hash = new TokenSequenceHash();
+            BinarySequenceHashBuilder hash = new BinarySequenceHashBuilder();
 
-            hash.MarkNextTokenAsNumber();
-            hash.MarkNextTokenAsAlpha();
-            hash.MarkNextTokenAsNumber();
-            hash.MarkNextTokenAsAlpha();
+            hash.AppendOneSequence();
+            hash.AppendZeroToSequence();
+            hash.AppendOneSequence();
+            hash.AppendZeroToSequence();
             
             byte[] bytes = hash.GetBytes();
 
@@ -66,35 +66,35 @@ namespace Sparrow.Core.Tests
         [ExpectedException(typeof(InvalidOperationException))]
         public void MarkAlphaWhenMaxNumberOfMarkersReached()
         {
-            byte[] sequence = new byte[TokenSequenceHash.SEQUENCE_LENGTH];
-            sequence[TokenSequenceHash.SEQUENCE_LENGTH - 1] = Byte.MaxValue;
+            byte[] sequence = new byte[BinarySequenceHashBuilder.SEQUENCE_BYTE_LENGTH];
+            sequence[BinarySequenceHashBuilder.SEQUENCE_BYTE_LENGTH - 1] = Byte.MaxValue;
 
-            TokenSequenceHash hash = new TokenSequenceHash(sequence);
+            BinarySequenceHashBuilder hash = new BinarySequenceHashBuilder(sequence);
 
-            hash.MarkNextTokenAsAlpha();
+            hash.AppendZeroToSequence();
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void MarkNumberWhenMaxNumberOfMarkersReached()
         {
-            byte[] sequence = new byte[TokenSequenceHash.SEQUENCE_LENGTH];
-            sequence[TokenSequenceHash.SEQUENCE_LENGTH - 1] = Byte.MaxValue;
+            byte[] sequence = new byte[BinarySequenceHashBuilder.SEQUENCE_BYTE_LENGTH];
+            sequence[BinarySequenceHashBuilder.SEQUENCE_BYTE_LENGTH - 1] = Byte.MaxValue;
 
-            TokenSequenceHash hash = new TokenSequenceHash(sequence);
+            BinarySequenceHashBuilder hash = new BinarySequenceHashBuilder(sequence);
 
-            hash.MarkNextTokenAsAlpha();
+            hash.AppendZeroToSequence();
         }
 
         [TestMethod]
         public void SanityCheckBitsMarkedWhenAllBitsUsed()
         {
-            TokenSequenceHash hash = new TokenSequenceHash();
-            int lastMarkerIndex = TokenSequenceHash.SEQUENCE_LENGTH - 2;
+            BinarySequenceHashBuilder hash = new BinarySequenceHashBuilder();
+            int lastMarkerIndex = BinarySequenceHashBuilder.SEQUENCE_BYTE_LENGTH - 2;
 
             for (int i = 0; i < Byte.MaxValue; i++)
             {
-                hash.MarkNextTokenAsNumber();
+                hash.AppendOneSequence();
             }
 
             byte[] bytes = hash.GetBytes();
@@ -114,21 +114,21 @@ namespace Sparrow.Core.Tests
         [TestMethod]
         public void HashesAreEqualWhenEquivalentHashesAreCompared()
         {
-            TokenSequenceHash hash1 = new TokenSequenceHash();
+            BinarySequenceHashBuilder hash1 = new BinarySequenceHashBuilder();
 
             for (int i = 0; i < Byte.MaxValue; i++)
             {
                 if (i % 3 == 0)
                 {
-                    hash1.MarkNextTokenAsNumber();
+                    hash1.AppendOneSequence();
                 }
                 else if (i % 2 == 0)
                 {
-                    hash1.MarkNextTokenAsAlpha();
+                    hash1.AppendZeroToSequence();
                 }
             }
 
-            TokenSequenceHash hash2 = new TokenSequenceHash(hash1.GetBytes());
+            BinarySequenceHashBuilder hash2 = new BinarySequenceHashBuilder(hash1.GetBytes());
 
             Assert.IsTrue(hash1 == hash2, "==");
             Assert.IsTrue(hash1.Equals(hash2), ".Equals");
@@ -137,7 +137,7 @@ namespace Sparrow.Core.Tests
         [TestMethod]
         public void HashesNotEqualWhenOtherHashNull()
         {
-            TokenSequenceHash hash1 = new TokenSequenceHash();
+            BinarySequenceHashBuilder hash1 = new BinarySequenceHashBuilder();
 
             Assert.IsFalse(hash1 == null, "==");
             Assert.IsFalse(null == hash1, "==");
@@ -147,10 +147,10 @@ namespace Sparrow.Core.Tests
         [TestMethod]
         public void HashesNotEqualWhenBitsDoNotMatch()
         {
-            TokenSequenceHash hash1 = new TokenSequenceHash();
-            TokenSequenceHash hash2 = new TokenSequenceHash();
+            BinarySequenceHashBuilder hash1 = new BinarySequenceHashBuilder();
+            BinarySequenceHashBuilder hash2 = new BinarySequenceHashBuilder();
 
-            hash1.MarkNextTokenAsNumber();
+            hash1.AppendOneSequence();
 
             Assert.AreNotEqual(hash1, hash2);
         }
@@ -158,17 +158,17 @@ namespace Sparrow.Core.Tests
         [TestMethod]
         public void HashInCorrectStringFormatWhenToStringInvoked()
         {
-            TokenSequenceHash hash = new TokenSequenceHash();
+            BinarySequenceHashBuilder hash = new BinarySequenceHashBuilder();
 
-            hash.MarkNextTokenAsNumber();
-            hash.MarkNextTokenAsAlpha();
-            hash.MarkNextTokenAsNumber();
-            hash.MarkNextTokenAsAlpha();
+            hash.AppendOneSequence();
+            hash.AppendZeroToSequence();
+            hash.AppendOneSequence();
+            hash.AppendZeroToSequence();
 
-            hash.MarkNextTokenAsNumber();
-            hash.MarkNextTokenAsAlpha();
-            hash.MarkNextTokenAsNumber();
-            hash.MarkNextTokenAsAlpha();
+            hash.AppendOneSequence();
+            hash.AppendZeroToSequence();
+            hash.AppendOneSequence();
+            hash.AppendZeroToSequence();
 
             Assert.AreEqual("AA0000000000000000000000000000000000000000000000000000000000000008",
                             hash.ToString());

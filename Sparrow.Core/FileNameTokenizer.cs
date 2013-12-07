@@ -27,7 +27,7 @@ namespace Sparrow.Core
             }
 
             this.OriginalFileName = fileName;
-            this.TokenSequenceHash = new TokenSequenceHash();
+            this.TokenSequenceHash = new BinarySequenceHashBuilder();
             this.GenerateTokenizedFileName();
         }
 
@@ -35,7 +35,7 @@ namespace Sparrow.Core
 
         public string TokenizedFileName { get; private set; }
 
-        public TokenSequenceHash TokenSequenceHash { get; private set; }
+        public BinarySequenceHashBuilder TokenSequenceHash { get; private set; }
 
         public int TokenCount { get { return this.tokens.Count; } }
         
@@ -54,12 +54,12 @@ namespace Sparrow.Core
                 if (CharacterTypeHelper.IsAlpha(this.OriginalFileName[index]))
                 {
                     tokenEndIndex = GetEndIndexForType(index, CharacterTypeHelper.IsAlpha);
-                    this.TokenSequenceHash.MarkNextTokenAsAlpha();
+                    this.TokenSequenceHash.AppendZeroToSequence();
                 }
                 else if (CharacterTypeHelper.IsNumber(this.OriginalFileName[index]))
                 {
                     tokenEndIndex = GetEndIndexForType(index, CharacterTypeHelper.IsNumber);
-                    this.TokenSequenceHash.MarkNextTokenAsNumber();
+                    this.TokenSequenceHash.AppendOneSequence();
                 }
                 else if (this.OriginalFileName[index] == TOKEN_MARKER)
                 {
