@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BinarySequenceHashBuilder.cs" />
     <Compile Include="FileNameTokenizer.cs" />
     <Compile Include="IKnowledgeBase.cs" />
     <Compile Include="CharacterTypeHelper.cs" />
@@ -55,7 +56,6 @@
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FileNameEnvironmentContext.cs" />
-    <Compile Include="TokenSequenceHash.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

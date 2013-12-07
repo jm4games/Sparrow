@@ -51,10 +51,10 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\BinarySequenceHashBuilderTest.cs" />
     <Compile Include="Tests\FileNameTokenizerTests.cs" />
     <Compile Include="Tests\MaskedFileNameTests.cs" />
     <Compile Include="Tests\MaskRuleEngineTests.cs" />
-    <Compile Include="Tests\TokenSequenceHashTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sparrow.Core\Sparrow.Core.csproj">
