@@ -43,16 +43,18 @@
     <Compile Include="IKnowledgeBase.cs" />
     <Compile Include="CharacterTypeHelper.cs" />
     <Compile Include="IMaskedFileName.cs" />
+    <Compile Include="IMaskedRuleFactory.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="MaskConfiguration.cs" />
     <Compile Include="MaskedFileName.cs" />
     <Compile Include="MaskedFileNameEntity.cs" />
-    <Compile Include="MaskRule.cs" />
+    <Compile Include="IMaskRule.cs" />
+    <Compile Include="MaskRulesEvaluator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MaskRuleEngine.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="FileNameEvaluationContext.cs" />
+    <Compile Include="FileNameEnvironmentContext.cs" />
     <Compile Include="TokenSequenceHash.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
