@@ -1,24 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sparrow.Core
+﻿namespace Sparrow.Core
 {
-    public sealed class MaskedFileName<T> : IMaskedFileName
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
+    /// <summary>
+    /// A mask for a file name.
+    /// </summary>
+    /// <typeparam name="TMask">The type of mask.</typeparam>
+    public sealed class MaskedFileName<TMask> : IMaskedFileName
     {
         private readonly FileNameTokenizer tokenizer;
 
-        private readonly T defaultMask;
+        private readonly TMask defaultMask;
 
-        private readonly T[] maskMappings;
+        private readonly TMask[] maskMappings;
+
+        private readonly IDictionary<TMask, MaskConfiguration> availableMasks;
 
         private string maskedString;
 
         private bool isDirty = false;
-        
-        public MaskedFileName(FileNameTokenizer tokenizer, IDictionary<T, MaskConfiguration> tokenMasks)
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MaskedFileName{TMask}"/> class.
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer to create a mask from..</param>
+        /// <param name="tokenMasks">The masks to apply on tokens.</param>
+        /// <exception cref="System.ArgumentNullException">When tokenizer or tokenMasks null.</exception>
+        /// <exception cref="System.ArgumentException">A mask string does not exist for provided default mask.</exception>
+        public MaskedFileName(FileNameTokenizer tokenizer, IDictionary<TMask, MaskConfiguration> tokenMasks)
         {
             if (tokenizer == null)
             {
@@ -30,26 +41,24 @@ namespace Sparrow.Core
                 throw new ArgumentNullException("tokenMasks");
             }
 
-            if (!tokenMasks.ContainsKey(default(T)))
+            if (!tokenMasks.ContainsKey(default(TMask)))
             {
                 throw new ArgumentException("A mask string does not exist for provided default mask.");
             }
 
             this.tokenizer = tokenizer;
-            this.TokenMasks = tokenMasks;
-            this.defaultMask = default(T);
-            this.maskMappings = new T[tokenizer.TokenCount];
+            this.availableMasks = new Dictionary<TMask, MaskConfiguration>(tokenMasks);
+            this.defaultMask = default(TMask);
+            this.maskMappings = new TMask[tokenizer.TokenCount];
 
             for (int i=0; i < this.maskMappings.Length; i++)
             {
                 this.maskMappings[i] = defaultMask;
             }
         }
-
-        public IDictionary<T, MaskConfiguration> TokenMasks { get; private set; }
-
-        public FileNameTokenizer Tokenizer { get { return this.tokenizer; } }
         
+        public FileNameTokenizer Tokenizer { get { return this.tokenizer; } }
+                
         private void GenerateMaskedString()
         {
             StringBuilder builder = new StringBuilder();
@@ -66,11 +75,11 @@ namespace Sparrow.Core
                     }
                     else
                     {
-                        MaskConfiguration maskInfo = this.TokenMasks[this.maskMappings[tokenIndex]];
+                        MaskConfiguration maskInfo = this.availableMasks[this.maskMappings[tokenIndex]];
 
                         if (!maskInfo.IsMergable ||
                             tokenIndex == 0 || 
-                            !EqualityComparer<T>.Default.Equals(this.maskMappings[tokenIndex - 1], this.maskMappings[tokenIndex]))
+                            !EqualityComparer<TMask>.Default.Equals(this.maskMappings[tokenIndex - 1], this.maskMappings[tokenIndex]))
                         {
                             builder.Append(maskInfo.MaskString);
                         }
@@ -95,7 +104,7 @@ namespace Sparrow.Core
             return offset;
         }
 
-        public void SetTokenMask(int startIndex, int length, T mask)
+        public void SetTokenMask(int startIndex, int length, TMask mask)
         {
             if (startIndex < 0 || startIndex >= this.maskMappings.Length)
             {
@@ -114,7 +123,7 @@ namespace Sparrow.Core
             }
         }
 
-        public void SetTokenMask(IList<int> tokenIndexes, T mask)
+        public void SetTokenMask(IList<int> tokenIndexes, TMask mask)
         {
             if (tokenIndexes == null)
             {
@@ -127,14 +136,14 @@ namespace Sparrow.Core
             }
         }
 
-        public void SetTokenMask(int tokenIndex, T mask)
+        public void SetTokenMask(int tokenIndex, TMask mask)
         {
             if (tokenIndex < 0 || tokenIndex >= this.maskMappings.Length)
             {
                 throw new IndexOutOfRangeException(tokenIndex + " is not a valid token index.");
             }
 
-            if (!this.TokenMasks.ContainsKey(mask))
+            if (!this.availableMasks.ContainsKey(mask))
             {
                 throw new ArgumentException("Could not find string value for mask '" + this.maskMappings[tokenIndex].ToString() + "'.");
             }
@@ -142,17 +151,17 @@ namespace Sparrow.Core
             this.SetTokenMaskInternal(tokenIndex, mask);
         }
 
-        private void SetTokenMaskInternal(int tokenIndex, T mask)
+        private void SetTokenMaskInternal(int tokenIndex, TMask mask)
         {
             maskMappings[tokenIndex] = mask;
             isDirty = true;
         }
 
-        public string GetFirstMaskValue(T mask)
+        public string GetFirstMaskValue(TMask mask)
         {
             for (int i = 0; i < this.maskMappings.Length; i++)
             {
-                if (EqualityComparer<T>.Default.Equals(this.maskMappings[i], mask))
+                if (EqualityComparer<TMask>.Default.Equals(this.maskMappings[i], mask))
                 {
                     return this.tokenizer[i];
                 }
@@ -161,7 +170,7 @@ namespace Sparrow.Core
             return null;
         }
 
-        public string GetMaskValue(T mask, string delimiter)
+        public string GetMaskValue(TMask mask, string delimiter)
         {
             if (delimiter == null)
             {
@@ -172,7 +181,7 @@ namespace Sparrow.Core
 
             for (int i = 0; i < this.maskMappings.Length; i++)
             {
-                if (EqualityComparer<T>.Default.Equals(this.maskMappings[i], mask))
+                if (EqualityComparer<TMask>.Default.Equals(this.maskMappings[i], mask))
                 {
                     builder.AppendFormat("{0}{1}", this.tokenizer[i], delimiter);
                 }
@@ -186,9 +195,9 @@ namespace Sparrow.Core
             return builder.ToString();
         }
 
-        public T[] GetMaskMappings()
+        public TMask[] GetMaskMappings()
         {
-            T[] mappings = new T[this.maskMappings.Length];
+            TMask[] mappings = new TMask[this.maskMappings.Length];
 
             this.maskMappings.CopyTo(mappings, 0);
             return mappings;
@@ -196,7 +205,7 @@ namespace Sparrow.Core
 
         public bool IsMaskSetForToken(int tokenIndex)
         {
-            return EqualityComparer<T>.Default.Equals(this.maskMappings[tokenIndex], this.defaultMask);
+            return EqualityComparer<TMask>.Default.Equals(this.maskMappings[tokenIndex], this.defaultMask);
         }
 
         public override string ToString()

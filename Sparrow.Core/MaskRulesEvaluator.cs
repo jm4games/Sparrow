@@ -2,8 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -98,7 +96,7 @@
         /// <param name="startingTokenIndex">Index of the token to start generating a sequence from.</param>
         /// <returns>True if at least one rule evaluated to true against a sequence; otherwise false.</returns>
         /// <remarks>
-        /// This method will combine a sequence of tokens that don't have a mask into a single string which will be then
+        /// This method will combine a sequence of tokens that don't have a mask into a single string which will then be
         /// evaluated against the rules. For sequence containing more then 2 tokens, the sequence will be gradually reduced 
         /// so that all subsequences are evaluated.
         /// <para />
@@ -138,6 +136,7 @@
                                            startingTokenIndex,
                                            (sequenceLastIndex - startingTokenIndex) + 1 /* +1 accounts for sequenceLastIndex being inclusive */,
                                            result.Mask);
+                    this.Context.MasksResolvedCount++;
                     return true;
                 }
             }
@@ -147,8 +146,16 @@
 
         private async Task<MatchResult> TryMatchRuleAsync(string value)
         {
+            bool isNumber = value.IsNumber();
+
             foreach (IMaskRule<TMask, TKnow> rule in this.rules)
             {
+                if ((isNumber && rule.ValueRestriction == MaskRuleValueRestriction.Alphabetical) ||
+                    (!isNumber && rule.ValueRestriction == MaskRuleValueRestriction.Numeric))
+                {
+                    continue;
+                }                
+
                 if (await rule.IsMatchAsync(value).ConfigureAwait(false))
                 {
                     return new MatchResult() { WasMatch = true, Mask = rule.Mask };

@@ -22,17 +22,15 @@ namespace Sparrow.Core
 
             this.MaskedString = maskedString;
             this.KnowledgeBase = knowledgeBase;
-            this.SetMaskCount = 0;
-
-            //TODO: add code for increasing mask count
+            this.MasksResolvedCount = 0;
         }
 
         public MaskedFileName<TMask> MaskedString { get; private set; }
 
         public TKnow KnowledgeBase { get; private set; }
 
-        public bool AllTokensHaveMask { get { return this.SetMaskCount == MaskedString.Tokenizer.TokenCount; } }
+        public bool AllTokensHaveMask { get { return this.MasksResolvedCount == MaskedString.Tokenizer.TokenCount; } }
 
-        internal int SetMaskCount { get; set; }
+        internal int MasksResolvedCount { get; set; }
     }
 }

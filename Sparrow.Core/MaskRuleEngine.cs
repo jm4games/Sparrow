@@ -11,7 +11,7 @@
     /// <typeparam name="TMask">The type of the mask.</typeparam>
     /// <typeparam name="TKnow">The type of the knowledge base used by rules.</typeparam>
     /// <remarks>This class is thread-safe.</remarks>
-    public sealed class MaskRuleEngine<TMask, TKnow> where TKnow : IKnowledgeBase
+    internal sealed class MaskRuleEngine<TMask, TKnow> where TKnow : IKnowledgeBase
     {
         private readonly IMaskedRuleFactory<TMask, TKnow> ruleFactory;
         
