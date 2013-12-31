@@ -13,15 +13,15 @@
     /// <remarks>This class is thread-safe.</remarks>
     internal sealed class MaskRuleEngine<TMask, TKnow> where TKnow : IKnowledgeBase<TMask>
     {
-        private readonly IMaskRuleFactory<TMask, TKnow> ruleFactory;
+        private readonly IMaskRuleSetFactory<TMask, TKnow> ruleFactory;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="MaskRuleEngine{TMask, TKnow}"/> class.
         /// </summary>
-        /// <param name="ruleFactory">The rule factory.</param>
+        /// <param name="ruleFactory">The rule set factory.</param>
         /// <exception cref="System.ArgumentNullException">When ruleProvider null.</exception>
         /// <remarks>This class expects the factory to be thread-safe.</remarks>
-        public MaskRuleEngine(IMaskRuleFactory<TMask, TKnow> ruleFactory)
+        public MaskRuleEngine(IMaskRuleSetFactory<TMask, TKnow> ruleFactory)
         {
             if (ruleFactory == null)
             {
@@ -110,7 +110,7 @@
 
         private async Task EvaluateWithRulesEvaluator(FileNameEnvironmentContext<TMask, TKnow> context, IList<IMaskRule<TMask>> rules)
         {
-            MaskRulesEvaluator<TMask, TKnow> evaluator = new MaskRulesEvaluator<TMask, TKnow>(context, rules);
+            MaskRuleSetEvaluator<TMask, TKnow> evaluator = new MaskRuleSetEvaluator<TMask, TKnow>(context, rules);
 
             do
             {

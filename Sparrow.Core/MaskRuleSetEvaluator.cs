@@ -9,18 +9,18 @@
     /// </summary>
     /// <typeparam name="TMask">The type of the mask.</typeparam>
     /// <typeparam name="TKnow">The type of the knowledge base used by rules.</typeparam>
-    internal sealed class MaskRulesEvaluator<TMask, TKnow> where TKnow : IKnowledgeBase<TMask>
+    internal sealed class MaskRuleSetEvaluator<TMask, TKnow> where TKnow : IKnowledgeBase<TMask>
     {
         private readonly IList<IMaskRule<TMask>> rules;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MaskRulesEvaluator{TMask, TKnow}"/> class.
+        /// Initializes a new instance of the <see cref="MaskRuleSetEvaluator{TMask, TKnow}"/> class.
         /// </summary>
         /// <param name="context">The context used by rules.</param>
         /// <param name="rules">The rules to evaluate.</param>
         /// <exception cref="System.ArgumentNullException">When context or rules null.</exception>
         /// <exception cref="System.ArgumentException">When no rules are defined.</exception>
-        public MaskRulesEvaluator(FileNameEnvironmentContext<TMask, TKnow> context, IList<IMaskRule<TMask>> rules)
+        public MaskRuleSetEvaluator(FileNameEnvironmentContext<TMask, TKnow> context, IList<IMaskRule<TMask>> rules)
         {
             if (context == null)
             {

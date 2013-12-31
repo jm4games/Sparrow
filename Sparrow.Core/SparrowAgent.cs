@@ -18,7 +18,7 @@ namespace Sparrow.Core
         
         private readonly TKnow knowledgeBase;
 
-        public SparrowAgent(IDictionary<TMask, MaskConfiguration> masks, IMaskRuleFactory<TMask, TKnow> ruleFactory, TKnow knowledgeBase, IFileNameFactory<TMask> fileNameFactory)
+        public SparrowAgent(IDictionary<TMask, MaskConfiguration> masks, IMaskRuleSetFactory<TMask, TKnow> ruleFactory, TKnow knowledgeBase, IFileNameFactory<TMask> fileNameFactory)
         {
             if (masks == null)
             {

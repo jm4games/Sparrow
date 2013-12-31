@@ -45,14 +45,14 @@
     <Compile Include="IFileNameFactory.cs" />
     <Compile Include="IKnowledgeBase.cs" />
     <Compile Include="CharacterTypeHelper.cs" />
-    <Compile Include="IMaskRuleFactory.cs" />
+    <Compile Include="IMaskRuleSetFactory.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="MaskConfiguration.cs" />
     <Compile Include="MaskedFileName.cs" />
     <Compile Include="IMaskRule.cs" />
     <Compile Include="MaskedFileNameReader.cs" />
     <Compile Include="MaskMapping.cs" />
-    <Compile Include="MaskRulesEvaluator.cs" />
+    <Compile Include="MaskRuleSetEvaluator.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MaskRuleEngine.cs">
