@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sparrow.Core
 {
-    public sealed class SparrowAgent<TMask, TKnow> where TKnow : IKnowledgeBase
+    public sealed class SparrowAgent<TMask, TKnow> where TKnow : IKnowledgeBase<TMask>
     {
         private readonly PriorityQueue<AgentWorkItem<TMask, TKnow>> queue = new PriorityQueue<AgentWorkItem<TMask, TKnow>>();
 
@@ -41,30 +41,12 @@ namespace Sparrow.Core
             FileNameEnvironmentContext<TMask, TKnow> context = new FileNameEnvironmentContext<TMask, TKnow>(filePath, this.masks, this.knowledgeBase);
             AgentWorkItem<TMask, TKnow> workItem = new AgentWorkItem<TMask, TKnow>(context);
 
-            //TODO: First try to evaluate file name against existing knowledge base
-
-            this.AddWorkItemToQueue(workItem);
+             // do not await the following line, the invoker of current method doesn't care when it completes
+            this.ruleEngine.EvaluateFileNameAgainstRulesAsync(context).ContinueWith(this.CompleteTaskEvaluateFileName, workItem);
 
             return context.FileNameProcessedCompletionSource.Task.ContinueWith<Task<string>>(this.CompleteTaskFileNameProcessedAsync, workItem).Unwrap();
         }
 
-        private void AddWorkItemToQueue(AgentWorkItem<TMask, TKnow> workItem)
-        {
-            // do not await following line, the invoker of current method doesn't care when it completes
-            this.queue.EnqueueAsync(workItem).ContinueWith(this.CompleteTaskEnqueue);
-        }
-
-        private void CompleteTaskEnqueue(Task completedTask)
-        {
-            //TODO: come up with algorithm/settings to throttle filename processing
-
-            //TODO: Evaluate file name against existing knowledge base before passing item to rule engine
-
-            this.queue.DequeueAsync()
-                        .ContinueWith((task) => this.ruleEngine.EvaluateFileNameAgainstRulesAsync(task.Result.Context)
-                                                                    .ContinueWith(this.CompleteTaskEvaluateFileName, task.Result));
-        }
-        
         private void CompleteTaskEvaluateFileName(Task<bool> task, object workItemState)
         {
             AgentWorkItem<TMask, TKnow> workItem = workItemState as AgentWorkItem<TMask, TKnow>;
@@ -84,8 +66,18 @@ namespace Sparrow.Core
                 //TODO: check to see if we need to start teaching
 
                 workItem.Attempts++;
-                this.AddWorkItemToQueue(workItem);
+
+                // do not await the following line, the invoker of current method doesn't care when it completes
+                this.queue.EnqueueAsync(workItem).ContinueWith(this.CompleteTaskEnqueue);
             }
+        }
+
+        private void CompleteTaskEnqueue(Task completedTask)
+        {
+            //TODO: come up with algorithm/settings to throttle filename processing
+            this.queue.DequeueAsync()
+                        .ContinueWith((task) => this.ruleEngine.EvaluateFileNameAgainstRulesAsync(task.Result.Context)
+                                                                    .ContinueWith(this.CompleteTaskEvaluateFileName, task.Result));
         }
 
         private Task<string> CompleteTaskFileNameProcessedAsync(Task<string> completedTask, object workItem)

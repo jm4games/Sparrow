@@ -10,7 +10,7 @@
         Any = 0x3
     }
 
-    public interface IMaskRule<TMask, TKnow> where TKnow : IKnowledgeBase
+    public interface IMaskRule<TMask>
     {
         MaskRuleValueRestriction ValueRestriction { get; }
 

@@ -11,7 +11,7 @@
     /// <typeparam name="TMask">The type of the mask.</typeparam>
     /// <typeparam name="TKnow">The type of the knowledge base used by rules.</typeparam>
     /// <remarks>This class is thread-safe.</remarks>
-    internal sealed class MaskRuleEngine<TMask, TKnow> where TKnow : IKnowledgeBase
+    internal sealed class MaskRuleEngine<TMask, TKnow> where TKnow : IKnowledgeBase<TMask>
     {
         private readonly IMaskRuleFactory<TMask, TKnow> ruleFactory;
         
@@ -48,8 +48,69 @@
             {
                 return true;
             }
-            
-            MaskRulesEvaluator<TMask, TKnow> evaluator = new MaskRulesEvaluator<TMask, TKnow>(context, this.ruleFactory.CreateRules(context));
+                        
+            IList<IMaskRule<TMask>> rules = this.ruleFactory.CreateRules(context);
+                        
+            if (await TryEvaluateAgainstExistingKnowledgeBase(context, rules).ConfigureAwait(false))
+            {
+                context.MasksResolvedCount = context.MaskedFileName.Tokenizer.TokenCount;
+            }
+            else
+            {
+                await this.EvaluateWithRulesEvaluator(context, rules).ConfigureAwait(false);
+            }
+           
+
+            return context.AllTokensHaveMask;
+        }
+
+        private async Task<bool> TryEvaluateAgainstExistingKnowledgeBase(FileNameEnvironmentContext<TMask, TKnow> context, IList<IMaskRule<TMask>> rules)
+        {
+            IList<MaskedFileName<TMask>> maskedFileNames = await context.KnowledgeBase.GetMaskFileNamesByTokenizerAsync(context.MaskedFileName.Tokenizer).ConfigureAwait(false);
+            Dictionary<TMask, IMaskRule<TMask>> rulesByMask = rules.ToDictionary(rule => rule.Mask);
+            int matches = 0;
+
+            foreach (MaskedFileName<TMask> maskedFileName in maskedFileNames)
+            {
+                if (await TryMatchMaskedFileName(maskedFileName, rulesByMask).ConfigureAwait(false))
+                {
+                    matches++;
+                }
+            }
+
+            if (matches == 1)
+            {
+                return true;
+            }
+            else if (matches > 1)
+            {
+                // TODO: come up with a possible method of choosing best match or maybe it not possible to match
+            }
+
+            return false;
+        }
+
+        private static async Task<bool> TryMatchMaskedFileName(MaskedFileName<TMask> maskedFileName, Dictionary<TMask, IMaskRule<TMask>> rules)
+        {
+            MaskedFileNameReader<TMask> reader = new MaskedFileNameReader<TMask>(maskedFileName);
+
+            while (!reader.EndOfMaskedFileName)
+            {
+                TMask mask;
+                string value = reader.ReadNextMaskValue(out mask);
+
+                if (!await rules[mask].IsMatchAsync(value).ConfigureAwait(false))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private async Task EvaluateWithRulesEvaluator(FileNameEnvironmentContext<TMask, TKnow> context, IList<IMaskRule<TMask>> rules)
+        {
+            MaskRulesEvaluator<TMask, TKnow> evaluator = new MaskRulesEvaluator<TMask, TKnow>(context, rules);
 
             do
             {
@@ -57,8 +118,6 @@
                 while (await evaluator.EvaluateMaskedStringTokensIndividuallyAsync().ConfigureAwait(false)) { }
             }
             while (await evaluator.EvaluateMaskedStringTokenSequencesAsync().ConfigureAwait(false) && !context.AllTokensHaveMask);
-
-            return context.AllTokensHaveMask;
         }
     }
 }

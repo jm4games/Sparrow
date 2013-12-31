@@ -9,9 +9,9 @@
     /// </summary>
     /// <typeparam name="TMask">The type of the mask.</typeparam>
     /// <typeparam name="TKnow">The type of the knowledge base used by rules.</typeparam>
-    internal sealed class MaskRulesEvaluator<TMask, TKnow> where TKnow : IKnowledgeBase
+    internal sealed class MaskRulesEvaluator<TMask, TKnow> where TKnow : IKnowledgeBase<TMask>
     {
-        private readonly IList<IMaskRule<TMask, TKnow>> rules;
+        private readonly IList<IMaskRule<TMask>> rules;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MaskRulesEvaluator{TMask, TKnow}"/> class.
@@ -20,7 +20,7 @@
         /// <param name="rules">The rules to evaluate.</param>
         /// <exception cref="System.ArgumentNullException">When context or rules null.</exception>
         /// <exception cref="System.ArgumentException">When no rules are defined.</exception>
-        public MaskRulesEvaluator(FileNameEnvironmentContext<TMask, TKnow> context, IList<IMaskRule<TMask, TKnow>> rules)
+        public MaskRulesEvaluator(FileNameEnvironmentContext<TMask, TKnow> context, IList<IMaskRule<TMask>> rules)
         {
             if (context == null)
             {
@@ -149,7 +149,7 @@
         {
             bool isNumber = value.IsNumber();
 
-            foreach (IMaskRule<TMask, TKnow> rule in this.rules)
+            foreach (IMaskRule<TMask> rule in this.rules)
             {
                 if ((isNumber && rule.ValueRestriction == MaskRuleValueRestriction.Alphabetical) ||
                     (!isNumber && rule.ValueRestriction == MaskRuleValueRestriction.Numeric))

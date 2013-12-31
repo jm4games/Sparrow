@@ -12,7 +12,7 @@ namespace Sparrow.Core
     using System.Text;
     using System.Threading.Tasks;
 
-    internal sealed class AgentWorkItem<TMask, TKnow> where TKnow : IKnowledgeBase
+    internal sealed class AgentWorkItem<TMask, TKnow> where TKnow : IKnowledgeBase<TMask>
     {
         public AgentWorkItem(FileNameEnvironmentContext<TMask, TKnow> context)
         {

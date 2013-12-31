@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
-
-namespace Sparrow.Core
+﻿namespace Sparrow.Core
 {
-    public interface IKnowledgeBase
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+
+    public interface IKnowledgeBase<TMask>
     {
-        MaskedFileNameEntity CreateMaskedFileNameEntity(IMaskedFileName maskedFileName);
+        Task<uint> AddMaskedFileNameAsync(MaskedFileName<TMask> maskedFileName);
 
-        void AddTokenizedFileNameForMaskedFileName(uint maskedFileNameId, FileNameTokenizer tokenizer);
+        Task AddTokenizerForMaskedFileNameAsync(uint maskedFileNameId, FileNameTokenizer tokenizer);
 
-        IList<MaskedFileNameEntity> GetMaskFileNameEntities(FileNameTokenizer tokenizer);
+        Task<IList<MaskedFileName<TMask>>> GetMaskFileNamesByTokenizerAsync(FileNameTokenizer tokenizer);
     }
 }

@@ -5,7 +5,7 @@
     using System.IO;
     using System.Threading.Tasks;
 
-    public sealed class FileNameEnvironmentContext<TMask, TKnow> : IEquatable<FileNameEnvironmentContext<TMask, TKnow>> where TKnow : IKnowledgeBase
+    public sealed class FileNameEnvironmentContext<TMask, TKnow> : IEquatable<FileNameEnvironmentContext<TMask, TKnow>> where TKnow : IKnowledgeBase<TMask>
     {
         private readonly string filePath;
 

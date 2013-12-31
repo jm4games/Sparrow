@@ -8,7 +8,7 @@
     /// A mask for a file name.
     /// </summary>
     /// <typeparam name="TMask">The type of mask.</typeparam>
-    public sealed class MaskedFileName<TMask> : IMaskedFileName
+    public sealed class MaskedFileName<TMask>
     {
         private readonly FileNameTokenizer tokenizer;
 
@@ -18,24 +18,33 @@
 
         private readonly IDictionary<TMask, MaskConfiguration> availableMasks;
 
+        private readonly bool isReadOnly = false;
+
         private string maskedString;
 
         private bool isDirty = false;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MaskedFileName{TMask}"/> class.
-        /// </summary>
-        /// <param name="tokenizer">The tokenizer to create a mask from..</param>
-        /// <param name="tokenMasks">The masks to apply on tokens.</param>
-        /// <exception cref="System.ArgumentNullException">When tokenizer or tokenMasks null.</exception>
-        /// <exception cref="System.ArgumentException">A mask string does not exist for provided default mask.</exception>
-        public MaskedFileName(FileNameTokenizer tokenizer, IDictionary<TMask, MaskConfiguration> tokenMasks)
+        private MaskedFileName(FileNameTokenizer tokenizer)
         {
             if (tokenizer == null)
             {
                 throw new ArgumentNullException("tokenizer");
             }
 
+            this.tokenizer = tokenizer;
+            this.maskMappings = new TMask[tokenizer.TokenCount];
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MaskedFileName{TMask}"/> class.
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer to create a mask from.</param>
+        /// <param name="tokenMasks">The masks to apply on tokens.</param>
+        /// <exception cref="System.ArgumentNullException">When tokenizer or tokenMasks null.</exception>
+        /// <exception cref="System.ArgumentException">A mask string does not exist for provided default mask.</exception>
+        public MaskedFileName(FileNameTokenizer tokenizer, IDictionary<TMask, MaskConfiguration> tokenMasks)
+            : this(tokenizer)
+        {
             if (tokenMasks == null)
             {
                 throw new ArgumentNullException("tokenMasks");
@@ -46,18 +55,59 @@
                 throw new ArgumentException("A mask string does not exist for provided default mask.");
             }
 
-            this.tokenizer = tokenizer;
             this.availableMasks = new Dictionary<TMask, MaskConfiguration>(tokenMasks);
             this.defaultMask = default(TMask);
-            this.maskMappings = new TMask[tokenizer.TokenCount];
-
+            
             for (int i=0; i < this.maskMappings.Length; i++)
             {
                 this.maskMappings[i] = defaultMask;
             }
         }
+
+        /// <summary>
+        /// Initializes a new (readonly) instance of the <see cref="MaskedFileName{TMask}"/> class.
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer to create a mask from.</param>
+        /// <exception cref="System.ArgumentNullException">When tokenizer, maskedString, or maskMappings null.</exception>
+        /// <exception cref="System.IndexOutOfRangeException">When a token index in a mask mapping is not valid.</exception>
+        public MaskedFileName(FileNameTokenizer tokenizer, string maskedString, IList<MaskMapping<TMask>> maskMappings)
+            : this(tokenizer)
+        {
+            if (String.IsNullOrEmpty(maskedString))
+            {
+                throw new ArgumentNullException("maskedString");
+            }
+
+            if (maskMappings == null)
+            {
+                throw new ArgumentNullException("maskedMappings");
+            }
+
+            this.maskedString = maskedString;
+            this.isReadOnly = true;
+
+            foreach (MaskMapping<TMask> mapping in maskMappings)
+            {
+                for (int i = 0; i < mapping.TokenIndexes.Count; i++)
+                {
+                    int tokenIndex = mapping.TokenIndexes[i];
+
+                    if (tokenIndex < 0 || tokenIndex >= tokenizer.TokenCount)
+                    {
+                        throw new IndexOutOfRangeException(tokenIndex + " is not a valid token index.");
+                    }
+
+                    this.maskMappings[tokenIndex] = mapping.Mask;
+                }
+            }
+        }
         
         public FileNameTokenizer Tokenizer { get { return this.tokenizer; } }
+
+        public bool IsReadOnly
+        {
+            get { return this.isReadOnly; }
+        }
                 
         private void GenerateMaskedString()
         {
@@ -153,6 +203,11 @@
 
         private void SetTokenMaskInternal(int tokenIndex, TMask mask)
         {
+            if (this.isReadOnly)
+            {
+                throw new InvalidOperationException("The masked file name is readonly.");
+            }
+
             maskMappings[tokenIndex] = mask;
             isDirty = true;
         }
