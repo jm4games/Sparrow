@@ -49,7 +49,7 @@
                 return true;
             }
                         
-            IList<IMaskRule<TMask>> rules = this.ruleFactory.CreateRules(context);
+            IList<IMaskRule<TMask>> rules = this.ruleFactory.CreateRuleSet(context);
                         
             if (await TryEvaluateAgainstExistingKnowledgeBase(context, rules).ConfigureAwait(false))
             {
