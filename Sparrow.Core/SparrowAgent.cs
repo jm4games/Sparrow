@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sparrow.Core
+namespace Sparrow
 {
     public sealed class SparrowAgent<TMask, TKnow> where TKnow : IKnowledgeBase<TMask>
     {

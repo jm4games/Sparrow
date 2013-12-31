@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Sparrow.Core.Tests
+namespace Sparrow.Tests
 {
     [TestClass]
     public class BinarySequenceHashBuilderTest

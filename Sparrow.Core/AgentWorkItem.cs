@@ -4,7 +4,7 @@
 // </copyright>
 // ----------------------------------------------------------------------------------------
 
-namespace Sparrow.Core
+namespace Sparrow
 {
     using System;
     using System.Collections.Generic;

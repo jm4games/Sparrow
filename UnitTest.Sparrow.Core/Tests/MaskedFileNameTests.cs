@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Sparrow.Core
+namespace Sparrow
 {
     [TestClass]
     public class MaskedFileNameTests

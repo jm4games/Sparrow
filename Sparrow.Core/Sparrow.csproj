@@ -7,8 +7,8 @@
     <ProjectGuid>{26AFFDEB-0008-4354-99A8-8FA2B29BCFF1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sparrow.Core</RootNamespace>
-    <AssemblyName>Sparrow.Core</AssemblyName>
+    <RootNamespace>Sparrow</RootNamespace>
+    <AssemblyName>Sparrow</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

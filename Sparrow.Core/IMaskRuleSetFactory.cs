@@ -1,4 +1,4 @@
-﻿namespace Sparrow.Core
+﻿namespace Sparrow
 {
     using System.Collections.Generic;
 

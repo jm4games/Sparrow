@@ -6,8 +6,8 @@
     <ProjectGuid>{525F8DCF-0159-4E74-AEBD-957327B33D36}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sparrow.Core</RootNamespace>
-    <AssemblyName>UnitTest.Sparrow.Core</AssemblyName>
+    <RootNamespace>Sparrow</RootNamespace>
+    <AssemblyName>UnitTest.Sparrow</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -59,9 +59,9 @@
     <Compile Include="Tests\MaskRuleEngineTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sparrow.Core\Sparrow.Core.csproj">
+    <ProjectReference Include="..\Sparrow.Core\Sparrow.csproj">
       <Project>{26affdeb-0008-4354-99a8-8fa2b29bcff1}</Project>
-      <Name>Sparrow.Core</Name>
+      <Name>Sparrow</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
