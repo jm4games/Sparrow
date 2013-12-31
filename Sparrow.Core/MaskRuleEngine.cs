@@ -13,7 +13,7 @@
     /// <remarks>This class is thread-safe.</remarks>
     internal sealed class MaskRuleEngine<TMask, TKnow> where TKnow : IKnowledgeBase
     {
-        private readonly IMaskedRuleFactory<TMask, TKnow> ruleFactory;
+        private readonly IMaskRuleFactory<TMask, TKnow> ruleFactory;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="MaskRuleEngine{TMask, TKnow}"/> class.
@@ -21,7 +21,7 @@
         /// <param name="ruleFactory">The rule factory.</param>
         /// <exception cref="System.ArgumentNullException">When ruleProvider null.</exception>
         /// <remarks>This class expects the factory to be thread-safe.</remarks>
-        public MaskRuleEngine(IMaskedRuleFactory<TMask, TKnow> ruleFactory)
+        public MaskRuleEngine(IMaskRuleFactory<TMask, TKnow> ruleFactory)
         {
             if (ruleFactory == null)
             {
@@ -35,7 +35,7 @@
         /// Evaluates a file name defined by the context against a set of rules defined when the engine was created.
         /// </summary>
         /// <param name="context">The context containing the file name to evaluate.</param>
-        /// <returns>True if the</returns>
+        /// <returns>True the file name could be fully process; otherwise, false.</returns>
         /// <exception cref="System.ArgumentNullException">When context null.</exception>
         public async Task<bool> EvaluateFileNameAgainstRulesAsync(FileNameEnvironmentContext<TMask, TKnow> context)
         {

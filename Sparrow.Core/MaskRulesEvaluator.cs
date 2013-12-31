@@ -54,13 +54,14 @@
         {
             bool maskFound = false;
 
-            for (int i = 0; i < this.Context.MaskedString.Tokenizer.TokenCount && !this.Context.AllTokensHaveMask; i++)
+            for (int i = 0; i < this.Context.MaskedFileName.Tokenizer.TokenCount && !this.Context.AllTokensHaveMask; i++)
             {
-                MatchResult result = await this.TryMatchRuleAsync(this.Context.MaskedString.Tokenizer[i]).ConfigureAwait(false);
+                MatchResult result = await this.TryMatchRuleAsync(this.Context.MaskedFileName.Tokenizer[i]).ConfigureAwait(false);
 
-                if (!this.Context.MaskedString.IsMaskSetForToken(i) && result.WasMatch)
+                if (!this.Context.MaskedFileName.IsMaskSetForToken(i) && result.WasMatch)
                 {
-                    this.Context.MaskedString.SetTokenMask(i, result.Mask);
+                    this.Context.MaskedFileName.SetTokenMask(i, result.Mask);
+                    this.Context.MasksResolvedCount++;
                     maskFound = true;
                 }
             }
@@ -77,9 +78,9 @@
         {
             bool ruleFound = false;
 
-            for (int i = 0; i < this.Context.MaskedString.Tokenizer.TokenCount && !this.Context.AllTokensHaveMask; i++)
+            for (int i = 0; i < this.Context.MaskedFileName.Tokenizer.TokenCount && !this.Context.AllTokensHaveMask; i++)
             {
-                if (this.Context.MaskedString.IsMaskSetForToken(i))
+                if (this.Context.MaskedFileName.IsMaskSetForToken(i))
                 {
                     continue;
                 }
@@ -109,34 +110,34 @@
             int sequenceLastIndex = IndexNotSetValue;
 
             // try to create sequence
-            for (int j = startingTokenIndex + 1; j < this.Context.MaskedString.Tokenizer.TokenCount; j++)
+            for (int j = startingTokenIndex + 1; j < this.Context.MaskedFileName.Tokenizer.TokenCount; j++)
             {
-                if (this.Context.MaskedString.IsMaskSetForToken(j))
+                if (this.Context.MaskedFileName.IsMaskSetForToken(j))
                 {
                     sequenceLastIndex = j;
                 }
             }
 
             if (sequenceLastIndex == IndexNotSetValue &&
-                startingTokenIndex + 1 < this.Context.MaskedString.Tokenizer.TokenCount &&
-                !this.Context.MaskedString.IsMaskSetForToken(this.Context.MaskedString.Tokenizer.TokenCount - 1))
+                startingTokenIndex + 1 < this.Context.MaskedFileName.Tokenizer.TokenCount &&
+                !this.Context.MaskedFileName.IsMaskSetForToken(this.Context.MaskedFileName.Tokenizer.TokenCount - 1))
             {
                 // if condition evaluated to true it means that all tokens after index 'i' had no mask set.
-                sequenceLastIndex = this.Context.MaskedString.Tokenizer.TokenCount - 1;
+                sequenceLastIndex = this.Context.MaskedFileName.Tokenizer.TokenCount - 1;
             }
 
             if (sequenceLastIndex != IndexNotSetValue)
             {
-                MatchResult result = await this.TryMatchRuleAsync(this.Context.MaskedString.Tokenizer.GetTokenSequence(startingTokenIndex, sequenceLastIndex, " ")).ConfigureAwait(false);
+                MatchResult result = await this.TryMatchRuleAsync(this.Context.MaskedFileName.Tokenizer.GetTokenSequence(startingTokenIndex, sequenceLastIndex, " ")).ConfigureAwait(false);
 
                 // combine the strings for the sequence and evaluate the result
                 if (result.WasMatch)
                 {
-                    this.Context.MaskedString.SetTokenMask(
-                                           startingTokenIndex,
-                                           (sequenceLastIndex - startingTokenIndex) + 1 /* +1 accounts for sequenceLastIndex being inclusive */,
-                                           result.Mask);
-                    this.Context.MasksResolvedCount++;
+                    int maskSequenceLength = (sequenceLastIndex - startingTokenIndex) + 1; // +1 accounts for sequenceLastIndex being inclusive
+
+                    this.Context.MaskedFileName.SetTokenMask(startingTokenIndex, maskSequenceLength, result.Mask);
+                    this.Context.MasksResolvedCount += maskSequenceLength;
+
                     return true;
                 }
             }

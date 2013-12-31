@@ -39,18 +39,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AgentWorkItem.cs" />
     <Compile Include="BinarySequenceHashBuilder.cs" />
     <Compile Include="FileNameTokenizer.cs" />
+    <Compile Include="IFileNameFactory.cs" />
     <Compile Include="IKnowledgeBase.cs" />
     <Compile Include="CharacterTypeHelper.cs" />
     <Compile Include="IMaskedFileName.cs" />
-    <Compile Include="IMaskedRuleFactory.cs" />
+    <Compile Include="IMaskRuleFactory.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="MaskConfiguration.cs" />
     <Compile Include="MaskedFileName.cs" />
     <Compile Include="MaskedFileNameEntity.cs" />
     <Compile Include="IMaskRule.cs" />
     <Compile Include="MaskRulesEvaluator.cs" />
+    <Compile Include="PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MaskRuleEngine.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
