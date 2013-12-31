@@ -8,6 +8,8 @@ namespace Sparrow.Core
 {
     public sealed class FileNameTokenizer : IEnumerable<String>
     {
+        public const string DefaultTokenDelimiter = " ";
+
         private const int MAX_FILENAME_SIZE = 255;
 
         internal const char TOKEN_MARKER = '%';
@@ -93,24 +95,30 @@ namespace Sparrow.Core
             return offset;
         }
 
+        public string GetTokenSequence(int start, int end)
+        {
+            return this.GetTokenSequence(start, end, DefaultTokenDelimiter);
+        }
+
         public string GetTokenSequence(int start, int end, string delimiter)
         {
-            if (start < this.tokens.Count || start >= this.tokens.Count)
+            if (start < 0 || start >= this.tokens.Count)
             {
                 throw new IndexOutOfRangeException("start");
             }
 
-            if (end < this.tokens.Count || end >= this.tokens.Count)
+            if (end < 0 || end >= this.tokens.Count)
             {
                 throw new IndexOutOfRangeException("end");
             }
 
-            if (start >= end)
+            if (start > end)
             {
-                throw new ArgumentException("End is not greater than start.");
+                throw new ArgumentException("End is not greater than or equal to start.");
             }
             
             StringBuilder builder = new StringBuilder();
+            delimiter = delimiter ?? DefaultTokenDelimiter;
 
             for (int i = start; i <= end; i++)
             {

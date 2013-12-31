@@ -50,9 +50,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="MaskedFileNameFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\BinarySequenceHashBuilderTest.cs" />
     <Compile Include="Tests\FileNameTokenizerTests.cs" />
+    <Compile Include="Tests\MaskedFileNameReaderTests.cs" />
     <Compile Include="Tests\MaskedFileNameTests.cs" />
     <Compile Include="Tests\MaskRuleEngineTests.cs" />
   </ItemGroup>

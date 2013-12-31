@@ -1,10 +1,10 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace Sparrow.Core
+﻿namespace Sparrow.Core
 {
+    using System;
+    using System.Text;
+    using System.Collections.Generic;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     [TestClass]
     public class FileNameTokenizerTests
     {
@@ -109,6 +109,67 @@ namespace Sparrow.Core
             }
         }
 
-        // TODO: Test get token sequence
+        [TestMethod]
+        [ExpectedException(typeof(IndexOutOfRangeException))]
+        public void ExceptionThrownWhenStartIndexNotValidForTokenSequence()
+        {
+            FileNameTokenizer tokenizer = new FileNameTokenizer("test");
+
+            tokenizer.GetTokenSequence(-1, 1);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(IndexOutOfRangeException))]
+        public void ExceptionThrownWhenEndIndexNotValidForTokenSequence()
+        {
+            FileNameTokenizer tokenizer = new FileNameTokenizer("test");
+
+            tokenizer.GetTokenSequence(0, 2);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void ExceptionThrownWhenStartIndexGreaterThenEndIndexForTokenSequence()
+        {
+            FileNameTokenizer tokenizer = new FileNameTokenizer("test name");
+
+            tokenizer.GetTokenSequence(1, 0);
+        }
+
+        [TestMethod]
+        public void TokenSequenceHasAllTokensWhenTokenSequenceRequested()
+        {
+            const string filename = "File_Name_Test_32B";
+            FileNameTokenizer tokenizer = new FileNameTokenizer(filename);
+
+            Assert.AreEqual("File Name Test 32 B", tokenizer.GetTokenSequence(0, 4));
+        }
+
+        [TestMethod]
+        public void TokenSequenceHasCorrectDelimiterWhenTokenSequenceDelimiterSpecified()
+        {
+            const string filename = "File_Name_Test";
+            FileNameTokenizer tokenizer = new FileNameTokenizer(filename);
+
+            Assert.AreEqual("File*Name*Test", tokenizer.GetTokenSequence(0, 2, "*"));
+        }
+
+        [TestMethod]
+        public void DefaultTokenDelimiterUsedWhenTokenSequenceSpecifiesNullDelimiter()
+        {
+            const string filename = "File_Name_Test_32B";
+            FileNameTokenizer tokenizer = new FileNameTokenizer(filename);
+
+            Assert.AreEqual("File Name Test 32 B", tokenizer.GetTokenSequence(0, 4, null));
+        }
+
+        [TestMethod]
+        public void OneTokenReturnedWhenTokenSequencesStartAndEndIndexTheSame()
+        {
+            const string expected = "test";
+            FileNameTokenizer tokenizer = new FileNameTokenizer(expected);
+
+            Assert.AreEqual(expected, tokenizer.GetTokenSequence(0, 0));
+        }
     }
 }
