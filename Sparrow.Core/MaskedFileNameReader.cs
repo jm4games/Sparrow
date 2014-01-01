@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sparrow
+﻿namespace Sparrow
 {
+    using System;
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// Reads the values from a MaskedFileName by mask type.
+    /// </summary>
+    /// <typeparam name="TMask">The type of the mask used by the MaskFileName.</typeparam>
     public sealed class MaskedFileNameReader<TMask>
     {
         private readonly MaskedFileName<TMask> maskedFileName;
@@ -16,12 +17,23 @@ namespace Sparrow
 
         private int currentIndex = 0;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MaskedFileNameReader{TMask}"/> class.
+        /// </summary>
+        /// <param name="maskedFileName">The <see cref="MaskedFileName{TMask}"/> to read.</param>
+        /// <exception cref="System.ArgumentNullException">When maskedFileName null.</exception>
         public MaskedFileNameReader(MaskedFileName<TMask> maskedFileName)
-            : this (maskedFileName, FileNameTokenizer.DefaultTokenDelimiter)
+            : this(maskedFileName, FileNameTokenizer.DefaultTokenDelimiter)
         {
         }
 
-        public MaskedFileNameReader(MaskedFileName<TMask> maskedFileName, string tokenDelimeter)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MaskedFileNameReader{TMask}"/> class.
+        /// </summary>
+        /// <param name="maskedFileName">The <see cref="MaskedFileName{TMask}"/> to read.</param>
+        /// <param name="tokenDelimiter">The token delimiter to use when concatenating mask values.</param>
+        /// <exception cref="System.ArgumentNullException">When maskedFileName null.</exception>
+        public MaskedFileNameReader(MaskedFileName<TMask> maskedFileName, string tokenDelimiter)
         {
             if (maskedFileName == null)
             {
@@ -33,11 +45,21 @@ namespace Sparrow
             this.tokenDelimiter = tokenDelimiter ?? FileNameTokenizer.DefaultTokenDelimiter;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether all masked values have been read from the <see cref="MaskedFileName{TMask}"/>.
+        /// </summary>
         public bool EndOfMaskedFileName 
         {
             get { return this.currentIndex == this.masks.Length; }
         }
 
+        /// <summary>
+        /// Reads the next mask value.
+        /// </summary>
+        /// <param name="mask">The mask associated with the value.</param>
+        /// <returns>The value associated with the mask.</returns>
+        /// <exception cref="System.InvalidOperationException">When <see cref="MaskedFileName{TMask}"/> has already been fully read.</exception>
+        /// <remarks>The value could be a sequence of values joined by the delimiter specified when the reader was created.</remarks>
         public string ReadNextMaskValue(out TMask mask)
         {
             if (this.EndOfMaskedFileName)
@@ -45,18 +67,19 @@ namespace Sparrow
                 throw new InvalidOperationException("Masked file name has been fully read.");
             }
 
-            int maskStart = currentIndex;
-            mask = this.masks[currentIndex];
+            int maskStart = this.currentIndex;
+            mask = this.masks[this.currentIndex];
 
-            for (currentIndex++; currentIndex < this.masks.Length; currentIndex++)
+            for (this.currentIndex++; this.currentIndex < this.masks.Length; this.currentIndex++)
             {
-                if (!EqualityComparer<TMask>.Default.Equals(mask, this.masks[currentIndex]))
+                if (!this.maskedFileName.MaskConfigurations[mask].IsMergable ||
+                    !EqualityComparer<TMask>.Default.Equals(mask, this.masks[this.currentIndex]))
                 {
                     break;
                 }
             }
 
-            return this.maskedFileName.Tokenizer.GetTokenSequence(maskStart, currentIndex - 1, this.tokenDelimiter);
+            return this.maskedFileName.Tokenizer.GetTokenSequence(maskStart, this.currentIndex - 1, this.tokenDelimiter);
         }
     }
 }

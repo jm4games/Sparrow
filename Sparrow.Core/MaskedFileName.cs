@@ -7,7 +7,7 @@
     /// <summary>
     /// A mask for a file name.
     /// </summary>
-    /// <typeparam name="TMask">The type of mask.</typeparam>
+    /// <typeparam name="TMask">The type of mask to apply on the file name.</typeparam>
     public sealed class MaskedFileName<TMask>
     {
         private readonly FileNameTokenizer tokenizer;
@@ -16,7 +16,7 @@
 
         private readonly TMask[] maskMappings;
 
-        private readonly IDictionary<TMask, MaskConfiguration> availableMasks;
+        private readonly Dictionary<TMask, MaskConfiguration> availableMasks;
 
         private readonly bool isReadOnly = false;
 
@@ -24,6 +24,11 @@
 
         private bool isDirty = false;
 
+        /// <summary>
+        /// Private creater for default instance of the <see cref="MaskedFileName{TMask}"/> class from being created.
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer.</param>
+        /// <exception cref="System.ArgumentNullException">tokenizer</exception>
         private MaskedFileName(FileNameTokenizer tokenizer)
         {
             if (tokenizer == null)
@@ -68,6 +73,8 @@
         /// Initializes a new (readonly) instance of the <see cref="MaskedFileName{TMask}"/> class.
         /// </summary>
         /// <param name="tokenizer">The tokenizer to create a mask from.</param>
+        /// <param name="maskedString">The masked string for the file.</param>
+        /// <param name="maskMappings">The mappings of masks to token indexes.</param>
         /// <exception cref="System.ArgumentNullException">When tokenizer, maskedString, or maskMappings null.</exception>
         /// <exception cref="System.IndexOutOfRangeException">When a token index in a mask mapping is not valid.</exception>
         public MaskedFileName(FileNameTokenizer tokenizer, string maskedString, IList<MaskMapping<TMask>> maskMappings)
@@ -86,6 +93,37 @@
             this.maskedString = maskedString;
             this.isReadOnly = true;
 
+            // TODO: verify the masked string is valid for the mask mappings provided.
+
+            this.LoadMaskMappings(maskMappings);
+        }
+
+        /// <summary>
+        /// Gets the tokenizer used by the <see cref="MaskedFileName{TMask}"/>.
+        /// </summary>
+        public FileNameTokenizer Tokenizer 
+        { 
+            get { return this.tokenizer; } 
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="MaskedFileName{TMask}"/> is readonly.
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get { return this.isReadOnly; }
+        }
+
+        /// <summary>
+        /// Gets the mask configurations used by the <see cref="MaskedFileName{TMask}"/>.
+        /// </summary>
+        internal IReadOnlyDictionary<TMask, MaskConfiguration> MaskConfigurations
+        {
+            get { return this.availableMasks; }
+        }
+        
+        private void LoadMaskMappings(IList<MaskMapping<TMask>> maskMappings)
+        {
             foreach (MaskMapping<TMask> mapping in maskMappings)
             {
                 for (int i = 0; i < mapping.TokenIndexes.Count; i++)
@@ -101,59 +139,15 @@
                 }
             }
         }
-        
-        public FileNameTokenizer Tokenizer { get { return this.tokenizer; } }
 
-        public bool IsReadOnly
-        {
-            get { return this.isReadOnly; }
-        }
-                
-        private void GenerateMaskedString()
-        {
-            StringBuilder builder = new StringBuilder();
-            int tokenIndex = 0;
-            int index = 0;
-
-            while (index < this.tokenizer.TokenizedFileName.Length)
-            {
-                if (this.tokenizer.TokenizedFileName[index] == FileNameTokenizer.TOKEN_MARKER)
-                {
-                    if (this.tokenizer.TokenizedFileName[index + 1] == FileNameTokenizer.TOKEN_MARKER) // escaped token marker ie %% -> %
-                    {
-                        index += 2;
-                    }
-                    else
-                    {
-                        MaskConfiguration maskInfo = this.availableMasks[this.maskMappings[tokenIndex]];
-
-                        if (!maskInfo.IsMergable ||
-                            tokenIndex == 0 || 
-                            !EqualityComparer<TMask>.Default.Equals(this.maskMappings[tokenIndex - 1], this.maskMappings[tokenIndex]))
-                        {
-                            builder.Append(maskInfo.MaskString);
-                        }
-
-                        tokenIndex++;
-                        index = GetEndIndexForType(index, CharacterTypeHelper.IsNumber);
-                    }
-                }
-                else
-                {
-                    index++;
-                }
-            }
-
-            this.maskedString = builder.ToString();
-            this.isDirty = false;
-        }
-
-        private int GetEndIndexForType(int offset, CharacterTypeHelper.TypeCheck typeCheck)
-        {
-            while (++offset < this.tokenizer.TokenizedFileName.Length && typeCheck(this.tokenizer.TokenizedFileName[offset])) ;
-            return offset;
-        }
-
+        /// <summary>
+        /// Sets the mask for a sequential range of tokens.
+        /// </summary>
+        /// <param name="startIndex">The start index (inclusive).</param>
+        /// <param name="length">The length of the sequence.</param>
+        /// <param name="mask">The mask to set for each token.</param>
+        /// <exception cref="System.IndexOutOfRangeException">When the start index or length is not valid.</exception>
+        /// <exception cref="System.InvalidOperationException">When the <see cref="MaskedFileName{TMask}"/> is readonly.</exception>
         public void SetTokenMask(int startIndex, int length, TMask mask)
         {
             if (startIndex < 0 || startIndex >= this.maskMappings.Length)
@@ -173,6 +167,13 @@
             }
         }
 
+        /// <summary>
+        /// Sets the mask for a list of token indexes.
+        /// </summary>
+        /// <param name="tokenIndexes">The token indexes.</param>
+        /// <param name="mask">The mask to set for each token.</param>
+        /// <exception cref="System.ArgumentNullException">When tokenIndexes null.</exception>
+        /// <exception cref="System.InvalidOperationException">When the <see cref="MaskedFileName{TMask}"/> is readonly.</exception>
         public void SetTokenMask(IList<int> tokenIndexes, TMask mask)
         {
             if (tokenIndexes == null)
@@ -186,6 +187,14 @@
             }
         }
 
+        /// <summary>
+        /// Sets the mask for the token at specified index.
+        /// </summary>
+        /// <param name="tokenIndex">Index of the token.</param>
+        /// <param name="mask">The mask to set for the token.</param>
+        /// <exception cref="System.IndexOutOfRangeException">When the token index is not valid.</exception>
+        /// <exception cref="System.ArgumentException">When string value for mask could not be found.</exception>
+        /// <exception cref="System.InvalidOperationException">When the <see cref="MaskedFileName{TMask}"/> is readonly.</exception>
         public void SetTokenMask(int tokenIndex, TMask mask)
         {
             if (tokenIndex < 0 || tokenIndex >= this.maskMappings.Length)
@@ -201,6 +210,11 @@
             this.SetTokenMaskInternal(tokenIndex, mask);
         }
 
+        /// <summary>
+        /// Internal method that all public "SetTokenMask" methods should use when setting an actual token mask.
+        /// </summary>
+        /// <param name="tokenIndex">Index of the token.</param>
+        /// <param name="mask">The mask to set for the token.</param>
         private void SetTokenMaskInternal(int tokenIndex, TMask mask)
         {
             if (this.isReadOnly)
@@ -271,6 +285,50 @@
             }
 
             return this.maskedString;
+        }
+        private void GenerateMaskedString()
+        {
+            StringBuilder builder = new StringBuilder();
+            int tokenIndex = 0;
+            int index = 0;
+
+            while (index < this.tokenizer.TokenizedFileName.Length)
+            {
+                if (this.tokenizer.TokenizedFileName[index] == FileNameTokenizer.TOKEN_MARKER)
+                {
+                    if (this.tokenizer.TokenizedFileName[index + 1] == FileNameTokenizer.TOKEN_MARKER) // escaped token marker ie %% -> %
+                    {
+                        index += 2;
+                    }
+                    else
+                    {
+                        MaskConfiguration maskInfo = this.availableMasks[this.maskMappings[tokenIndex]];
+
+                        if (!maskInfo.IsMergable ||
+                            tokenIndex == 0 ||
+                            !EqualityComparer<TMask>.Default.Equals(this.maskMappings[tokenIndex - 1], this.maskMappings[tokenIndex]))
+                        {
+                            builder.Append(maskInfo.MaskString);
+                        }
+
+                        tokenIndex++;
+                        index = GetEndIndexForType(index, CharacterTypeHelper.IsNumber);
+                    }
+                }
+                else
+                {
+                    index++;
+                }
+            }
+
+            this.maskedString = builder.ToString();
+            this.isDirty = false;
+        }
+
+        private int GetEndIndexForType(int offset, CharacterTypeHelper.TypeCheck typeCheck)
+        {
+            while (++offset < this.tokenizer.TokenizedFileName.Length && typeCheck(this.tokenizer.TokenizedFileName[offset])) ;
+            return offset;
         }
     }
 }

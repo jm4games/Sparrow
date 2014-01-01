@@ -13,9 +13,9 @@
     {
         public static readonly Dictionary<TestMask, MaskConfiguration> MaskConfigurations = new Dictionary<TestMask, MaskConfiguration>()
                                                                                        {
-                                                                                           { TestMask.Any, new MaskConfiguration("A") { IsMergable = true } },
-                                                                                           { TestMask.Alpha, new MaskConfiguration("B") { IsMergable = true } },
-                                                                                           { TestMask.Numeric, new MaskConfiguration("C") }
+                                                                                           { TestMask.Any, new MaskConfiguration("A")},
+                                                                                           { TestMask.Alpha, new MaskConfiguration("B")},
+                                                                                           { TestMask.Numeric, new MaskConfiguration("C") { IsMergable = false } }
                                                                                        };
 
         public static MaskedFileName<TestMask> CreateWithEmptyFileName()

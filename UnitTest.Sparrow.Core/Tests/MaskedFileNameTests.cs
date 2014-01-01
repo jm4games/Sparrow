@@ -209,6 +209,8 @@ namespace Sparrow
             Assert.AreEqual(String.Format("{0}{1}{0}", masks[TestMask.M1].MaskString, masks[TestMask.M2].MaskString), mask.ToString());
         }
 
+        // TODO: Add readonly tests.
+
         private MaskedFileName<TestMask> CreateMask(string valueToTokenize)
         {
             return new MaskedFileName<TestMask>(new FileNameTokenizer(valueToTokenize), masks);
